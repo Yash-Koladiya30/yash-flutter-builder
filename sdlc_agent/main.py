@@ -8,7 +8,7 @@ import json
 import sys
 from pathlib import Path
 
-from llm import check_ollama_running
+from core.llm import check_ollama_running
 
 
 DEFAULT_IDEA = (
@@ -33,10 +33,10 @@ def main():
     idea = ' '.join(argv).strip() or DEFAULT_IDEA
 
     if linear:
-        from pipeline import run_pipeline
+        from orchestration.pipeline import run_pipeline
         state = run_pipeline(idea)
     else:
-        from orchestrator import run_orchestrated
+        from orchestration.orchestrator import run_orchestrated
         state = run_orchestrated(idea)
 
     # Persist audit trail

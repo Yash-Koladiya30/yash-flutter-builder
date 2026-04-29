@@ -4,10 +4,10 @@ If a checkpoint exists for the given idea, we resume from the first unfinished s
 After every stage completes, the full state dict is written to disk so an interrupted
 run can pick up without losing earlier work.
 """
-from state import initial_state, save_checkpoint, load_checkpoint
-from stage_registry import STAGE_REGISTRY
-from meta_planner import plan as meta_plan
-from meta_executor import execute_stage
+from core.state import initial_state, save_checkpoint, load_checkpoint
+from orchestration.registry import STAGE_REGISTRY
+from orchestration.meta_planner import plan as meta_plan
+from orchestration.meta_executor import execute_stage
 from tools.memory import store_run
 from tools.jira import create_jira_issue, create_jira_subtask, jira_enabled
 import time

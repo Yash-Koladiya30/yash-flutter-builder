@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parent))
 
-from llm import check_ollama_running, chat, embed
+from core.llm import check_ollama_running, chat, embed
 
 
 def check(label: str, ok: bool, detail: str = ''):
@@ -66,7 +66,7 @@ def main():
 
     # 6 & 7. ChromaDB collections
     try:
-        from vector_store import stats
+        from tools.vector_store import stats
         s = stats()
         print(f'  [INFO] ChromaDB path: {s["path"]}')
         patterns = s['collections'].get('patterns', {})

@@ -6,8 +6,8 @@ calls, it decomposes a goal into a sequence of SDLC stages from the registry.
 import json
 import re
 
-from llm import chat
-from stage_registry import STAGE_REGISTRY, describe_stages
+from core.llm import chat
+from orchestration.registry import STAGE_REGISTRY, describe_stages
 from tools.memory import retrieve_past_run
 
 

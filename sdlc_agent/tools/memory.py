@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-from vector_store import get_collection, delete_collection
+from tools.vector_store import get_collection, delete_collection
 
 
 COLLECTION_KEY = 'memory'

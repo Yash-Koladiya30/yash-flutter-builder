@@ -3,8 +3,8 @@ import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-from agent import run_agent
-from llm import chat
+from core.agent import run_agent
+from core.llm import chat
 from tools.knowledge import KNOWLEDGE_TOOL_SCHEMAS, KNOWLEDGE_TOOL_MAP
 from tools.market_research import MARKET_TOOL_SCHEMAS, MARKET_TOOL_MAP
 from tools.memory import MEMORY_TOOL_SCHEMAS, MEMORY_TOOL_MAP

@@ -4,11 +4,11 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parent))
 
-from vector_store import get_collection
+from tools.vector_store import get_collection
 from config import CHROMA_PATH, COLLECTIONS
 
 
-KB_DIR = Path(__file__).resolve().parent / 'knowledge_base'
+KB_DIR = Path(__file__).resolve().parent.parent / 'data' / 'knowledge_base'
 
 
 def chunk_text(text: str, words_per_chunk: int = 180) -> list:

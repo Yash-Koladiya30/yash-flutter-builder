@@ -1,0 +1,61 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "yashs-flutter-agent"
+version = "0.1.0"
+description = "Local-first multi-agent SDLC pipeline that turns one-line ideas into runnable Flutter apps. Powered by Ollama + ChromaDB."
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [{ name = "Yash Koladiya" }]
+license = { text = "MIT" }
+keywords = ["agentic-ai", "ollama", "flutter", "multi-agent", "rag", "chromadb", "sdlc"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Code Generators",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "ollama>=0.3.0",
+    "chromadb>=0.5.0",
+    "flask>=3.0.0",
+    "python-dotenv>=1.0.0",
+    "requests>=2.31.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.1.0",
+]
+anthropic = ["anthropic>=0.47.0"]
+
+[project.scripts]
+yashs-agent = "sdlc_agent.cli:main"
+
+[project.urls]
+Homepage      = "https://github.com/Yash-Koladiya30/yash-flutter-builder"
+Repository    = "https://github.com/Yash-Koladiya30/yash-flutter-builder"
+Issues        = "https://github.com/Yash-Koladiya30/yash-flutter-builder/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["sdlc_agent*"]
+exclude = ["tests*", "data*", "runtime*", "docs*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --tb=short"
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"

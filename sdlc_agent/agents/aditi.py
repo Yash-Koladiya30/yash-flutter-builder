@@ -3,8 +3,8 @@ import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-from llm import chat
-from state import validate_stage_input
+from core.llm import chat
+from core.state import validate_stage_input
 
 
 SYSTEM_PROMPT = '''You are a Flutter planning agent.

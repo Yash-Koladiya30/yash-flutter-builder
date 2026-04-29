@@ -384,45 +384,87 @@ curl -X POST http://localhost:5001/api/stop \
 
 ## 📁 Project Structure
 
+Properly grouped layout — every concern in its own folder.
+
 ```
-yashs-agent/
+yash-flutter-builder/
 ├── README.md
-├── docs/
-│   └── screenshots/                ← drop your screenshots here
-└── sdlc_agent/
-    ├── server.py                   ← Flask + SSE
-    ├── orchestrator.py             ← meta-planner + executor + rework loop
-    ├── pipeline.py                 ← linear fallback
-    ├── meta_planner.py             ← LLM picks stages
-    ├── meta_executor.py            ← dispatch + Jira transitions
-    ├── stage_registry.py           ← 5 agents
-    ├── stages/
-    │   ├── analysis.py             ← Deepika
-    │   ├── planning.py             ← Aditi
-    │   ├── design.py               ← Alia
-    │   ├── coding.py               ← Priyanka
-    │   └── testing.py              ← Katrina
-    ├── agent.py                    ← shared ReAct loop
-    ├── llm.py                      ← Ollama / Anthropic wrapper
-    ├── vector_store.py             ← ChromaDB singleton
-    ├── state.py                    ← state dict + checkpointing
-    ├── config.py                   ← per-stage model selection
-    ├── tools/
-    │   ├── file_ops.py             ← create_flutter_project, read/write Dart
-    │   ├── flutter_cli.py          ← analyze, test
-    │   ├── knowledge.py            ← pattern RAG
-    │   ├── memory.py               ← run-history RAG
-    │   ├── market_research.py      ← Play Store mock reviews
-    │   └── jira.py                 ← main + subtask + transitions
-    ├── knowledge_base/             ← 20 .md Flutter patterns
-    ├── chroma_db/                  ← vector DB (auto-created)
-    ├── checkpoints/                ← paused-run state JSONs
-    ├── webapp/
-    │   └── index.html              ← Three.js UI
-    ├── ingest_patterns.py          ← seeds ChromaDB
-    ├── check.py                    ← health probe
-    └── requirements.txt
+├── pyproject.toml                  ← installable Python package
+├── .gitignore
+├── .env.example
+│
+├── sdlc_agent/                     ← the package
+│   ├── __init__.py
+│   ├── server.py                   ← thin entry-point shim
+│   ├── main.py                     ← CLI entry-point
+│   ├── check.py                    ← health probe
+│   ├── ingest_patterns.py          ← seeds ChromaDB
+│   ├── memory_cli.py               ← memory inspector CLI
+│   ├── config.py                   ← per-stage model selection
+│   ├── requirements.txt
+│   │
+│   ├── agents/                     ← ONE FOLDER PER AGENT
+│   │   ├── deepika.py              ← analysis
+│   │   ├── aditi.py                ← planning
+│   │   ├── alia.py                 ← design
+│   │   ├── priyanka.py             ← coding
+│   │   └── katrina.py              ← testing
+│   │
+│   ├── orchestration/              ← META LAYER
+│   │   ├── orchestrator.py         ← planner+executor loop, rework, checkpoints
+│   │   ├── meta_planner.py         ← LLM picks stages
+│   │   ├── meta_executor.py        ← dispatch + Jira transitions
+│   │   ├── pipeline.py             ← linear fallback
+│   │   └── registry.py             ← stage registry (5 agents)
+│   │
+│   ├── core/                       ← SHARED PRIMITIVES
+│   │   ├── agent.py                ← Day-1 ReAct loop
+│   │   ├── state.py                ← state dict + checkpoint save/load
+│   │   └── llm.py                  ← Ollama / Anthropic wrapper
+│   │
+│   ├── tools/                      ← AGENT TOOLS (Day-2 principles)
+│   │   ├── file_ops.py             ← create_flutter_project, read/write Dart
+│   │   ├── flutter_cli.py          ← analyze, test, build, pub_get
+│   │   ├── knowledge.py            ← pattern RAG
+│   │   ├── memory.py               ← run-history RAG
+│   │   ├── market_research.py      ← Play Store mock reviews
+│   │   ├── jira.py                 ← main + subtask + transitions
+│   │   └── vector_store.py         ← ChromaDB singleton
+│   │
+│   ├── api/                        ← HTTP LAYER
+│   │   └── server.py               ← Flask app + SSE + REST routes
+│   │
+│   └── webapp/
+│       └── index.html              ← Three.js UI
+│
+├── data/                           ← STATIC INPUT DATA
+│   └── knowledge_base/             ← 20 .md Flutter patterns
+│
+├── runtime/                        ← GITIGNORED — generated state
+│   ├── chroma_db/                  ← vector DB
+│   ├── checkpoints/                ← paused-run state JSONs
+│   └── sdlc_output/                ← per-run audit trails
+│
+├── tests/                          ← PYTEST
+│   ├── test_state.py
+│   └── test_registry.py
+│
+└── docs/
+    └── screenshots/
 ```
+
+### Why this layout
+
+| Folder | Purpose | What lives here |
+|---|---|---|
+| `agents/` | One file per agent. Easy to add a sixth. | Per-agent `run(state)` functions |
+| `orchestration/` | Meta-layer. Decides what to run when. | Planner, executor, registry, pipeline |
+| `core/` | Cross-cutting primitives. | LLM client, state dict, ReAct loop |
+| `tools/` | Agent-callable functions + infra wrappers. | File ops, CLI, RAG, Jira |
+| `api/` | HTTP surface. | Flask routes + SSE |
+| `data/` | Curated input — committable. | Markdown patterns ingested into RAG |
+| `runtime/` | Generated state — gitignored. | Vector DB, checkpoints, output JSONs |
+| `tests/` | Pytest. | Smoke + contract tests |
 
 ---
 

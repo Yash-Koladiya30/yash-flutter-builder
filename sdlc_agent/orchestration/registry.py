@@ -4,7 +4,13 @@ Each entry describes what the stage does, what state keys it reads/writes,
 and when to skip or re-run it. The planner sees this catalog and chooses
 which stages to execute, in what order.
 """
-from stages import analysis, planning, design, coding, testing
+from agents import (
+    deepika  as analysis,
+    aditi    as planning,
+    alia     as design,
+    priyanka as coding,
+    katrina  as testing,
+)
 
 
 STAGE_REGISTRY = {

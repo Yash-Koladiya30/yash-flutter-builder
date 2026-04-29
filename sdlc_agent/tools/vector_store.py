@@ -11,7 +11,7 @@ import chromadb
 from chromadb.api.types import EmbeddingFunction, Embeddings, Documents
 
 from config import CHROMA_PATH, COLLECTIONS
-from llm import embed
+from core.llm import embed
 
 
 # Ensure the persistence directory exists before Chroma touches it.

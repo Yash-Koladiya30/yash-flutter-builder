@@ -10,9 +10,9 @@ import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-from llm import chat
-from state import validate_stage_input
-from agent import run_agent
+from core.llm import chat
+from core.state import validate_stage_input
+from core.agent import run_agent
 from tools.file_ops import (
     FILE_TOOL_SCHEMAS, FILE_TOOL_MAP,
     create_flutter_project, write_dart_file,
