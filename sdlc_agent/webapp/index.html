@@ -1,0 +1,3020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Yash's Agent · Build an app from an idea</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-0: #050609;
+  --bg-1: #0a0b14;
+  --bg-2: #12141f;
+  --bg-3: #1a1d2e;
+  --border: #252841;
+  --border-b: #3a3f66;
+  --text: #f4f5fb;
+  --muted: #8a90b5;
+  --muted-2: #5c618a;
+  --accent: #a78bfa;
+  --accent-2: #ec4899;
+  --accent-3: #22d3ee;
+  --ok: #4ade80;
+  --warn: #fbbf24;
+  --err: #f87171;
+  --s1: #6366f1; --s2: #a855f7; --s3: #ec4899; --s4: #f59e0b; --s5: #14b8a6;
+}
+
+html, body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-0);
+  color: var(--text);
+  line-height: 1.55;
+  overflow-x: hidden;
+}
+body { min-height: 100vh; position: relative; }
+
+/* ===== FIXED GALAXY BG (whole page) ===== */
+#bg-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.bg-fade {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 0%, transparent 0%, rgba(5,6,9,0.2) 40%, rgba(5,6,9,0.7) 100%);
+  mix-blend-mode: multiply;
+}
+
+/* ===== NAV ===== */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 28px;
+  z-index: 100;
+  background: rgba(5,6,9,0.5);
+  backdrop-filter: blur(24px) saturate(140%);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.logo {
+  display: flex; align-items: center; gap: 12px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700; font-size: 15px;
+  letter-spacing: -0.01em;
+}
+.logo-mark {
+  width: 34px; height: 34px;
+  border-radius: 10px;
+  background: conic-gradient(from 180deg at 50% 50%, #a855f7, #ec4899, #f59e0b, #22d3ee, #6366f1, #a855f7);
+  box-shadow: 0 0 24px rgba(168,85,247,0.45), inset 0 0 12px rgba(255,255,255,0.15);
+  position: relative;
+  animation: spin 20s linear infinite;
+}
+.logo-mark::after {
+  content: ''; position: absolute; inset: 6px;
+  background: var(--bg-0); border-radius: 6px;
+}
+.logo-mark::before {
+  content: '◆'; position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; z-index: 1; color: #fff;
+  text-shadow: 0 0 10px #ec4899;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+nav .links { display: flex; gap: 28px; font-size: 13px; }
+nav .links a {
+  color: var(--muted); text-decoration: none; cursor: pointer;
+  transition: color 0.2s; position: relative;
+}
+nav .links a:hover { color: var(--text); }
+nav .links a::after {
+  content: ''; position: absolute; bottom: -4px; left: 0; right: 0;
+  height: 1px; background: linear-gradient(90deg, var(--s2), var(--s3));
+  transform: scaleX(0); transition: transform 0.25s;
+}
+nav .links a:hover::after { transform: scaleX(1); }
+
+.status-pill {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--muted);
+  background: rgba(255,255,255,0.02);
+}
+.status-pill .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted-2); }
+.status-pill.ok .dot { background: var(--ok); box-shadow: 0 0 12px var(--ok); animation: pulse 1.6s ease-in-out infinite; }
+.status-pill.err .dot { background: var(--err); box-shadow: 0 0 10px var(--err); }
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.35; } }
+
+/* ===== HERO ===== */
+.hero {
+  min-height: 100vh;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  padding: 120px 24px 80px;
+  z-index: 5;
+}
+.hero-content {
+  position: relative; z-index: 6;
+  text-align: center; max-width: 920px; width: 100%;
+}
+.tag {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 8px 16px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 999px;
+  font-size: 12px; color: #e0e7ff;
+  margin-bottom: 28px;
+  font-family: 'Space Grotesk', sans-serif;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  animation: fadeInUp 0.8s ease-out both;
+}
+.tag-beta {
+  padding: 3px 10px; border-radius: 8px;
+  background: linear-gradient(135deg, #a855f7, #ec4899);
+  color: #fff; font-weight: 700; font-size: 10px; letter-spacing: 0.2em;
+  box-shadow: 0 0 20px rgba(168,85,247,0.4);
+}
+.hero h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(32px, 5vw, 64px);
+  font-weight: 700; line-height: 0.98;
+  letter-spacing: -0.04em;
+  margin-bottom: 24px;
+  animation: fadeInUp 0.9s ease-out 0.1s both;
+}
+.hero h1 .line {
+  display: block;
+  background: linear-gradient(180deg, #ffffff 0%, #d0d4e8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.hero h1 .grad {
+  background: linear-gradient(90deg, #a855f7, #ec4899 45%, #f59e0b 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% 100%;
+  animation: shift 8s ease-in-out infinite;
+}
+@keyframes shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.hero .sub {
+  font-size: clamp(16px, 1.4vw, 18px);
+  color: var(--muted);
+  max-width: 640px;
+  margin: 0 auto 44px;
+  animation: fadeInUp 1s ease-out 0.2s both;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== PROMPT CARD ===== */
+.prompt-wrap {
+  position: relative;
+  animation: fadeInUp 1.1s ease-out 0.3s both;
+  max-width: 760px; margin: 0 auto;
+}
+.prompt-glow {
+  position: absolute;
+  inset: -2px;
+  border-radius: 22px;
+  background: conic-gradient(from var(--deg,0deg) at 50% 50%, #a855f7, #ec4899, #f59e0b, #22d3ee, #a855f7);
+  filter: blur(14px);
+  opacity: 0.5;
+  animation: rot 8s linear infinite;
+  z-index: -1;
+}
+@keyframes rot { to { --deg: 360deg; } }
+@property --deg { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+
+.prompt-card {
+  background: rgba(10, 11, 20, 0.78);
+  backdrop-filter: blur(24px) saturate(140%);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  padding: 22px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  position: relative;
+}
+.prompt-card textarea {
+  width: 100%; min-height: 80px;
+  padding: 14px 16px;
+  background: transparent; border: none;
+  color: var(--text); font-family: inherit;
+  font-size: 16px; resize: none; outline: none;
+  line-height: 1.4;
+}
+.prompt-card textarea::placeholder { color: var(--muted-2); }
+
+.resume-banner {
+  display: flex; align-items: center; gap: 12px;
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: linear-gradient(90deg, rgba(251,191,36,0.1), rgba(236,72,153,0.08));
+  border: 1px solid rgba(251,191,36,0.35);
+  border-radius: 12px;
+  font-size: 13px;
+  animation: fadeInUp 0.3s ease-out;
+}
+.resume-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--warn);
+  box-shadow: 0 0 12px var(--warn);
+  animation: pulse 1.6s ease-in-out infinite;
+  flex-shrink: 0;
+}
+.resume-text {
+  flex: 1;
+  color: var(--text);
+}
+.resume-text strong { color: var(--warn); }
+.resume-text span { color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+.fresh-check {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+.fresh-check input {
+  accent-color: var(--accent-2);
+  cursor: pointer;
+}
+
+.prompt-actions {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+.mode-toggle {
+  display: flex; gap: 4px;
+  padding: 4px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.mode-btn {
+  padding: 7px 14px; border: none; background: transparent;
+  color: var(--muted); cursor: pointer;
+  font-size: 12px; font-family: inherit; font-weight: 500;
+  border-radius: 7px; transition: all 0.2s;
+}
+.mode-btn.active {
+  background: rgba(168,85,247,0.15);
+  color: #e9d5ff;
+  box-shadow: 0 0 20px rgba(168,85,247,0.2);
+}
+.run-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 11px 22px;
+  border: none; border-radius: 12px;
+  background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+  color: #fff; font-family: inherit; font-weight: 600; font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 8px 28px rgba(168,85,247,0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.run-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 36px rgba(168,85,247,0.55); }
+.run-btn:disabled { opacity: 0.6; cursor: wait; transform: none; }
+.run-btn .arr { display: inline-flex; transition: transform 0.25s; }
+.run-btn:hover .arr { transform: translateX(3px); }
+
+.stop-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 11px 20px;
+  border: 1px solid rgba(251,191,36,0.5);
+  background: rgba(251,191,36,0.08);
+  color: #fef3c7;
+  border-radius: 12px;
+  font-family: inherit; font-weight: 600; font-size: 14px;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: all 0.15s;
+}
+.stop-btn:hover {
+  background: rgba(251,191,36,0.18);
+  border-color: var(--warn);
+  color: #fff;
+}
+.stop-btn:disabled { opacity: 0.6; cursor: wait; }
+.stop-btn[hidden] { display: none !important; }
+.stop-btn .stop-dot {
+  display: inline-flex; gap: 2px;
+}
+.stop-btn .stop-dot::before,
+.stop-btn .stop-dot::after {
+  content: '';
+  width: 3px; height: 12px;
+  background: var(--warn);
+  border-radius: 1px;
+}
+
+/* ===== COMPLETION OVERLAY ===== */
+.finish-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5,6,9,0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 200;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  animation: fadeInOverlay 0.3s ease-out;
+}
+.finish-overlay[hidden] { display: none !important; }
+
+.settings-btn {
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  padding: 7px 14px;
+  color: var(--muted);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-right: 8px;
+}
+.settings-btn:hover { color: var(--text); border-color: var(--accent); background: rgba(122,162,255,0.08); }
+
+/* ===== Settings modal — polished card ===== */
+.settings-card {
+  position: relative;
+  width: min(640px, 92vw);
+  max-height: 88vh;
+  background: linear-gradient(180deg, rgba(20,22,36,0.98) 0%, rgba(10,11,20,0.98) 100%);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03) inset;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: popIn 0.35s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+/* Header */
+.settings-head {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 16px;
+  align-items: center;
+  padding: 22px 26px;
+  border-bottom: 1px solid var(--border);
+  background:
+    radial-gradient(60% 100% at 0% 0%, rgba(122,162,255,0.08), transparent 60%),
+    radial-gradient(60% 100% at 100% 0%, rgba(168,85,247,0.06), transparent 60%);
+}
+.settings-head-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  background: linear-gradient(135deg, rgba(122,162,255,0.18), rgba(168,85,247,0.18));
+  border: 1px solid rgba(122,162,255,0.3);
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.settings-head-text h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  margin: 0;
+}
+.settings-head-text p {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 4px 0 0;
+  line-height: 1.5;
+}
+.settings-head-text code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  padding: 1px 6px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 4px;
+  color: var(--accent);
+}
+.settings-x {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+  color: var(--muted);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.settings-x:hover { color: var(--text); border-color: var(--err); background: rgba(248,113,113,0.08); }
+
+/* Tabs */
+.settings-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 14px 22px 0;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.01);
+}
+.settings-tab {
+  padding: 10px 16px 12px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.15s;
+}
+.settings-tab:hover { color: var(--text); }
+.settings-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* Body */
+.settings-body {
+  padding: 24px 26px 18px;
+  overflow-y: auto;
+  flex: 1;
+}
+.settings-body::-webkit-scrollbar { width: 8px; }
+.settings-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+.settings-tab-pane { display: none; animation: fadeInPane 0.25s ease-out; }
+.settings-tab-pane.active { display: block; }
+@keyframes fadeInPane {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Field group */
+.field { margin-bottom: 20px; text-align: left; }
+.field-label {
+  display: block;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.field-label-row { display: flex; justify-content: space-between; align-items: baseline; }
+.field-link {
+  font-size: 11px;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+}
+.field-link:hover { text-decoration: underline; }
+.field-hint {
+  font-size: 11px;
+  color: var(--muted);
+  margin: 0 0 10px;
+  line-height: 1.5;
+}
+.field-hint code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 1px 5px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 3px;
+  color: var(--accent);
+}
+.field input {
+  width: 100%;
+  padding: 11px 14px;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+.field input::placeholder { color: var(--muted-2); }
+.field input:hover { border-color: var(--border-b); background: rgba(0,0,0,0.5); }
+.field input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(122,162,255,0.15);
+  background: rgba(0,0,0,0.55);
+}
+.field-row { display: flex; gap: 8px; align-items: stretch; }
+.field-row > input { flex: 1; }
+.field-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 180px;
+  gap: 16px;
+}
+@media (max-width: 540px) {
+  .field-grid-2 { grid-template-columns: 1fr; }
+}
+
+/* Buttons */
+.btn-ghost {
+  padding: 10px 16px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+  color: var(--text);
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.btn-ghost:hover { background: rgba(255,255,255,0.07); border-color: var(--border-b); }
+.btn-ghost:disabled { opacity: 0.5; cursor: wait; }
+.btn-block { width: 100%; }
+.btn-primary {
+  padding: 11px 20px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+  color: #fff;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(168,85,247,0.35);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(168,85,247,0.45); }
+.btn-primary:disabled { opacity: 0.6; cursor: wait; transform: none; }
+
+/* Status banner */
+.settings-status {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  min-height: 0;
+  margin-top: 8px;
+  display: none;
+}
+.settings-status.ok,
+.settings-status.err,
+.settings-status.info { display: block; }
+.settings-status.ok   { background: rgba(74,222,128,0.1);  color: var(--ok);     border: 1px solid rgba(74,222,128,0.3); }
+.settings-status.err  { background: rgba(248,113,113,0.1); color: var(--err);    border: 1px solid rgba(248,113,113,0.3); }
+.settings-status.info { background: rgba(122,162,255,0.08); color: var(--accent); border: 1px solid rgba(122,162,255,0.25); }
+
+/* Footer */
+.settings-foot {
+  padding: 16px 26px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  background: rgba(0,0,0,0.25);
+}
+.settings-foot-hint {
+  font-size: 11px;
+  color: var(--muted-2);
+  font-family: 'JetBrains Mono', monospace;
+}
+.settings-foot-actions {
+  display: flex;
+  gap: 10px;
+}
+@media (max-width: 540px) {
+  .settings-foot { flex-direction: column; align-items: stretch; }
+  .settings-foot-actions { justify-content: stretch; }
+  .settings-foot-actions > * { flex: 1; }
+}
+
+/* Toggle switch */
+.toggle-field {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  align-items: center;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.02);
+  margin-bottom: 24px;
+}
+.toggle-field .field-hint { margin: 4px 0 0; }
+.switch {
+  position: relative;
+  width: 48px; height: 26px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.switch input { opacity: 0; width: 0; height: 0; }
+.switch-slider {
+  position: absolute; cursor: pointer; inset: 0;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  transition: 0.25s;
+}
+.switch-slider::before {
+  position: absolute; content: '';
+  height: 18px; width: 18px;
+  left: 3px; top: 3px;
+  background: var(--muted);
+  border-radius: 50%;
+  transition: 0.25s;
+}
+.switch input:checked + .switch-slider {
+  background: linear-gradient(135deg, #a855f7, #ec4899);
+  border-color: transparent;
+}
+.switch input:checked + .switch-slider::before {
+  transform: translateX(22px);
+  background: #fff;
+}
+#jiraFieldsWrap.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+  filter: saturate(0.4);
+}
+
+/* Diagnostics result rows */
+.diag-results { margin-top: 14px; display: grid; gap: 8px; }
+.diag-results[hidden] { display: none; }
+.diag-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 14px;
+  align-items: center;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.02);
+  font-size: 13px;
+  animation: logIn 0.2s ease-out;
+}
+.diag-row.ok   { border-color: rgba(74,222,128,0.35); background: rgba(74,222,128,0.05); }
+.diag-row.err  { border-color: rgba(248,113,113,0.4); background: rgba(248,113,113,0.05); }
+.diag-row.skip { opacity: 0.7; border-style: dashed; }
+.diag-icon {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 12px;
+  flex-shrink: 0;
+}
+.diag-row.ok   .diag-icon { background: rgba(74,222,128,0.2);  color: var(--ok); }
+.diag-row.err  .diag-icon { background: rgba(248,113,113,0.2); color: var(--err); }
+.diag-row.skip .diag-icon { background: rgba(255,255,255,0.06); color: var(--muted); }
+.diag-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  color: var(--text);
+}
+.diag-detail {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.diag-summary {
+  margin: 12px 0 4px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(122,162,255,0.08);
+  border: 1px solid rgba(122,162,255,0.25);
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--accent);
+  text-align: center;
+}
+.diag-summary.all-ok  { background: rgba(74,222,128,0.1); border-color: rgba(74,222,128,0.35); color: var(--ok); }
+.diag-summary.has-err { background: rgba(248,113,113,0.08); border-color: rgba(248,113,113,0.3); color: var(--err); }
+.resume-banner[hidden],
+.finish-path[hidden],
+.finish-cmd[hidden],
+.finish-actions button[hidden] { display: none !important; }
+@keyframes fadeInOverlay {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.finish-card {
+  max-width: 600px; width: 100%;
+  background: linear-gradient(180deg, rgba(18,20,31,0.95) 0%, rgba(10,11,20,0.98) 100%);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 40px;
+  box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+  animation: popIn 0.35s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+.finish-card.success { border-color: rgba(74,222,128,0.4); }
+.finish-card.failure { border-color: rgba(248,113,113,0.4); }
+.finish-card.stopped { border-color: rgba(251,191,36,0.4); }
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+.finish-icon {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px; font-weight: 800;
+  margin: 0 auto 20px;
+}
+.finish-card.success .finish-icon { background: rgba(74,222,128,0.2); color: var(--ok); }
+.finish-card.failure .finish-icon { background: rgba(248,113,113,0.2); color: var(--err); }
+.finish-card.stopped .finish-icon { background: rgba(251,191,36,0.2); color: var(--warn); }
+.finish-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 28px; font-weight: 700;
+  text-align: center; letter-spacing: -0.01em;
+  margin-bottom: 8px;
+}
+.finish-sub {
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+  margin-bottom: 28px;
+}
+.finish-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.finish-stat {
+  padding: 12px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  text-align: center;
+}
+.finish-stat .v {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 22px; font-weight: 700;
+  color: var(--accent);
+}
+.finish-stat .l {
+  font-size: 10px; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--muted);
+  margin-top: 2px;
+}
+.finish-path {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: var(--accent);
+  margin-bottom: 14px;
+  word-break: break-all;
+}
+.finish-cmd {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  background: rgba(0,0,0,0.6);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: #e0f2fe;
+  margin-bottom: 10px;
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 12px;
+}
+.finish-cmd code { color: #86efac; }
+.copy-btn {
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.05);
+  color: var(--muted);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.copy-btn:hover { color: var(--text); border-color: var(--accent); }
+.finish-actions {
+  display: flex; gap: 10px; justify-content: center;
+  margin-top: 24px;
+}
+.finish-actions button {
+  padding: 11px 22px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+.finish-actions button.primary {
+  background: linear-gradient(135deg, #a855f7, #ec4899);
+  border: none;
+  box-shadow: 0 8px 24px rgba(168,85,247,0.35);
+}
+.finish-actions button:hover { transform: translateY(-1px); }
+
+.examples {
+  margin-top: 20px;
+  display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+  animation: fadeInUp 1.2s ease-out 0.4s both;
+}
+.example-chip {
+  padding: 8px 16px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.02);
+  color: var(--muted); font-size: 12px; cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.example-chip:hover {
+  color: #fff; border-color: var(--accent);
+  background: rgba(168,85,247,0.1);
+  transform: translateY(-1px);
+}
+
+.stats-band {
+  display: flex; justify-content: center; gap: 40px;
+  margin-top: 60px; flex-wrap: wrap;
+  animation: fadeInUp 1.3s ease-out 0.5s both;
+}
+.stat { text-align: center; }
+.stat .v {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 32px; font-weight: 700;
+  background: linear-gradient(180deg, #fff 0%, #a855f7 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.stat .l {
+  font-size: 11px; text-transform: uppercase;
+  letter-spacing: 0.12em; color: var(--muted);
+  margin-top: 2px;
+}
+
+/* ===== FLOATING ROBOTS (cartoonies) ===== */
+.float-bot {
+  position: absolute; z-index: 4; pointer-events: none;
+  animation: float 6s ease-in-out infinite;
+  filter: drop-shadow(0 20px 40px rgba(0,0,0,0.5));
+}
+.float-bot.a { left: 5%; top: 22%; width: 190px; animation-delay: 0s; --r: -8deg; }
+.float-bot.b { right: 4%; top: 58%; width: 170px; animation-delay: 2s; --r: 12deg; }
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); }
+  50% { transform: translateY(-26px) rotate(var(--r, 0deg)); }
+}
+
+/* ===== SECTIONS ===== */
+main { position: relative; z-index: 5; }
+section {
+  padding: 100px 28px;
+  max-width: 1280px;
+  margin: 0 auto;
+  position: relative;
+}
+section h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(32px, 3.8vw, 48px);
+  font-weight: 700; letter-spacing: -0.02em;
+  margin-bottom: 12px; line-height: 1.1;
+}
+section .lead {
+  color: var(--muted); font-size: 16px;
+  max-width: 620px; margin-bottom: 50px;
+}
+
+/* ===== RUN PANEL + 3D runtime canvas ===== */
+.run-panel {
+  background: linear-gradient(180deg, rgba(18,20,31,0.82) 0%, rgba(10,11,20,0.88) 100%);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  padding: 0;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+}
+
+.runtime-stage {
+  position: relative;
+  height: 340px;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 50%, rgba(168,85,247,0.08) 0%, transparent 70%),
+    linear-gradient(180deg, #0a0b14 0%, #050609 100%);
+  border-bottom: 1px solid var(--border);
+}
+#run-canvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+}
+.runtime-overlay {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; justify-content: space-between;
+  padding: 20px 24px;
+  pointer-events: none;
+}
+.runtime-header {
+  display: flex; justify-content: space-between; align-items: center;
+}
+.runtime-status {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 8px 16px;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--muted);
+}
+.runtime-status .beacon {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--muted-2);
+  transition: background 0.3s, box-shadow 0.3s;
+}
+.runtime-status.live .beacon {
+  background: var(--ok);
+  box-shadow: 0 0 16px var(--ok);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+.runtime-status.live { color: var(--text); border-color: rgba(74,222,128,0.4); }
+
+.runtime-stage-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.2em;
+}
+.runtime-stage-label span { color: var(--accent); font-weight: 600; }
+
+.runtime-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 22px; font-weight: 600;
+  margin-top: 8px;
+  background: linear-gradient(180deg, #fff 0%, #8a90b5 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.runtime-title.active {
+  background: linear-gradient(90deg, #a855f7, #ec4899);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.runtime-hint {
+  font-size: 12px; color: var(--muted-2); margin-top: 4px;
+}
+
+.stages {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  padding: 28px;
+  border-bottom: 1px solid var(--border);
+}
+.stage-card {
+  position: relative;
+  padding: 18px;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  overflow: hidden;
+  transform-style: preserve-3d;
+}
+.stage-card::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--stage-c) 0%, transparent 70%);
+  opacity: 0; transition: opacity 0.4s;
+}
+.stage-card.active { border-color: var(--stage-c); transform: translateY(-4px) scale(1.02); box-shadow: 0 12px 32px rgba(0,0,0,0.4); }
+.stage-card.active::before { opacity: 0.15; }
+.stage-card.active .stage-num { background: var(--stage-c); color: #fff; box-shadow: 0 0 24px var(--stage-c); }
+.stage-card.active .stage-ring { animation: spinRing 1.5s linear infinite; opacity: 1; }
+.stage-card.done { border-color: rgba(74,222,128,0.5); }
+.stage-card.done .stage-num { background: var(--ok); color: #052e16; }
+.stage-card.done .stage-check { opacity: 1; transform: scale(1); }
+.stage-card.failed { border-color: rgba(248,113,113,0.55); }
+.stage-card.failed .stage-num { background: var(--err); color: #450a0a; }
+.stage-card.skipped { opacity: 0.45; }
+
+.stage-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; position: relative; }
+.stage-num {
+  width: 36px; height: 36px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  background: rgba(255,255,255,0.06);
+  color: var(--muted);
+  transition: all 0.3s;
+  position: relative;
+}
+.stage-ring {
+  position: absolute; inset: -5px;
+  border: 2px solid var(--stage-c);
+  border-top-color: transparent;
+  border-radius: 16px;
+  opacity: 0;
+}
+@keyframes spinRing { to { transform: rotate(360deg); } }
+.stage-check {
+  position: absolute; top: 12px; right: 12px;
+  width: 24px; height: 24px;
+  background: var(--ok); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: #052e16; font-weight: 800; font-size: 14px;
+  opacity: 0; transform: scale(0);
+  transition: all 0.4s cubic-bezier(0.2, 1.8, 0.4, 1);
+}
+.stage-name { font-weight: 600; font-size: 15px; font-family: 'Space Grotesk', sans-serif; }
+.stage-desc { font-size: 12px; color: var(--muted); line-height: 1.45; margin-top: 4px; }
+.stage-time { margin-top: 10px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted-2); }
+.stage-1 { --stage-c: var(--s1); }
+.stage-2 { --stage-c: var(--s2); }
+.stage-3 { --stage-c: var(--s3); }
+.stage-4 { --stage-c: var(--s4); }
+.stage-5 { --stage-c: var(--s5); }
+
+/* ===== OUTPUT ===== */
+.output-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 18px;
+  padding: 28px;
+}
+.terminal, .plan-panel {
+  background: rgba(0,0,0,0.5);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.panel-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em;
+  color: var(--muted); font-family: 'JetBrains Mono', monospace;
+}
+.panel-head .dots { display: flex; gap: 6px; }
+.panel-head .dots span { width: 11px; height: 11px; border-radius: 50%; }
+.panel-head .dots span:nth-child(1) { background: #f87171; }
+.panel-head .dots span:nth-child(2) { background: #fbbf24; }
+.panel-head .dots span:nth-child(3) { background: #4ade80; }
+.terminal-body, .plan-body {
+  padding: 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; line-height: 1.7;
+  max-height: 360px; overflow-y: auto;
+  color: var(--muted);
+}
+.terminal-body::-webkit-scrollbar, .plan-body::-webkit-scrollbar { width: 6px; }
+.terminal-body::-webkit-scrollbar-thumb, .plan-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.log-line { white-space: pre-wrap; word-break: break-word; animation: logIn 0.25s ease-out; }
+.log-line.accent { color: var(--accent); }
+.log-line.good { color: var(--ok); }
+.log-line.warn { color: var(--warn); }
+.log-line.err { color: var(--err); }
+@keyframes logIn { from { opacity: 0; transform: translateX(-4px); } to { opacity: 1; transform: translateX(0); } }
+.cursor { display: inline-block; width: 8px; height: 14px; background: var(--accent); animation: blink 1s step-start infinite; vertical-align: middle; margin-left: 2px; }
+@keyframes blink { 50% { opacity: 0; } }
+
+.plan-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px dashed rgba(255,255,255,0.05);
+  color: var(--text);
+}
+.plan-item:last-child { border-bottom: none; }
+.plan-item .stage-label { font-weight: 500; font-size: 13px; }
+.plan-item .stage-badge {
+  font-size: 10px; text-transform: uppercase; padding: 3px 10px;
+  border-radius: 999px; letter-spacing: 0.12em; font-family: 'JetBrains Mono', monospace;
+}
+.badge-pending { background: rgba(255,255,255,0.05); color: var(--muted); }
+.badge-running { background: rgba(168,85,247,0.18); color: var(--accent); }
+.badge-ok { background: rgba(74,222,128,0.15); color: var(--ok); }
+.badge-err { background: rgba(248,113,113,0.15); color: var(--err); }
+.badge-skip { background: rgba(251,191,36,0.15); color: var(--warn); }
+
+/* ===== FEATURE CARDS (3D tilt) ===== */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 22px;
+  perspective: 1400px;
+}
+.feature-card {
+  position: relative;
+  padding: 32px;
+  border-radius: 22px;
+  background: linear-gradient(160deg, rgba(168,85,247,0.1) 0%, rgba(236,72,153,0.05) 100%);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  transform-style: preserve-3d;
+  transform: perspective(1400px) rotateX(0deg) rotateY(0deg);
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.3s;
+}
+.feature-card:hover { border-color: var(--accent); }
+.feature-card::after {
+  content: '';
+  position: absolute;
+  top: -100px; right: -100px;
+  width: 220px; height: 220px;
+  background: radial-gradient(circle, rgba(168,85,247,0.22) 0%, transparent 60%);
+  filter: blur(30px);
+  opacity: 0.7; pointer-events: none;
+}
+.feature-card .ic {
+  width: 54px; height: 54px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 700;
+  background: linear-gradient(135deg, var(--f-a, #a855f7), var(--f-b, #ec4899));
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  margin-bottom: 20px;
+  font-family: 'Space Grotesk', sans-serif;
+  transform: translateZ(40px);
+}
+.feature-card h3 {
+  font-size: 18px; font-weight: 600;
+  margin-bottom: 10px;
+  font-family: 'Space Grotesk', sans-serif;
+  transform: translateZ(30px);
+}
+.feature-card p { color: var(--muted); font-size: 14px; line-height: 1.5; transform: translateZ(20px); }
+.feature-card code { color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+/* Floating decoration bots next to feature sections */
+.deco-bot {
+  position: absolute;
+  pointer-events: none;
+  filter: drop-shadow(0 20px 40px rgba(0,0,0,0.6));
+  opacity: 0.85;
+}
+.deco-bot.left { left: -40px; top: 30%; width: 140px; transform: rotate(-15deg); animation: float 8s ease-in-out infinite; }
+.deco-bot.right { right: -30px; top: 20%; width: 130px; transform: rotate(10deg); animation: float 9s ease-in-out 1.5s infinite; }
+
+/* ===== MEMORY / STAGES LIST ===== */
+.memory-list { display: grid; gap: 12px; position: relative; z-index: 2; }
+.memory-item {
+  padding: 18px 22px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(10,11,20,0.6);
+  backdrop-filter: blur(8px);
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 18px; align-items: center;
+  transition: all 0.2s;
+}
+.memory-item:hover { border-color: var(--accent); background: rgba(168,85,247,0.06); }
+.memory-item .app {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; color: var(--accent);
+  min-width: 140px;
+}
+.memory-item .idea {
+  color: var(--text); font-size: 14px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.memory-item .ts {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--muted);
+}
+.memory-empty {
+  padding: 50px 24px;
+  text-align: center;
+  color: var(--muted);
+  border: 1px dashed var(--border);
+  border-radius: 14px;
+  font-size: 14px;
+  background: rgba(10,11,20,0.5);
+}
+
+/* ===== CHECKPOINTS ===== */
+.checkpoint-card {
+  padding: 18px 22px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(251,191,36,0.05) 0%, rgba(10,11,20,0.6) 100%);
+  backdrop-filter: blur(8px);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  align-items: center;
+  transition: all 0.25s;
+}
+.checkpoint-card:hover { border-color: var(--warn); background: rgba(251,191,36,0.07); }
+.checkpoint-card.complete { border-color: rgba(74,222,128,0.4); background: linear-gradient(180deg, rgba(74,222,128,0.05) 0%, rgba(10,11,20,0.6) 100%); }
+
+.cp-meta { min-width: 0; }
+.cp-idea {
+  color: var(--text);
+  font-size: 14px; font-weight: 500;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-bottom: 8px;
+}
+.cp-stages {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  align-items: center;
+}
+.cp-stage {
+  padding: 3px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+}
+.cp-stage.done { background: rgba(74,222,128,0.15); color: var(--ok); }
+.cp-stage.next { background: rgba(251,191,36,0.18); color: var(--warn); border: 1px solid rgba(251,191,36,0.4); }
+.cp-stage.pending { background: rgba(255,255,255,0.04); color: var(--muted-2); }
+.cp-time {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+.cp-actions {
+  display: flex; gap: 8px;
+  flex-shrink: 0;
+}
+.cp-btn {
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.cp-btn:hover { background: rgba(255,255,255,0.08); transform: translateY(-1px); }
+.cp-btn.primary {
+  background: linear-gradient(135deg, var(--warn) 0%, var(--accent-2) 100%);
+  color: #1a1a1a;
+  border: none;
+  font-weight: 600;
+}
+.cp-btn.primary:hover { box-shadow: 0 6px 20px rgba(251,191,36,0.35); }
+.cp-btn.danger { color: var(--err); }
+.cp-btn.danger:hover { background: rgba(248,113,113,0.1); border-color: var(--err); }
+
+/* ===== FOOTER ===== */
+footer {
+  margin-top: 60px;
+  padding: 40px 28px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  color: var(--muted-2); font-size: 12px;
+  position: relative; z-index: 5;
+}
+
+@media (max-width: 900px) {
+  .float-bot, .deco-bot { display: none; }
+  .stages { grid-template-columns: repeat(2, 1fr); }
+  .output-grid { grid-template-columns: 1fr; }
+  nav .links { display: none; }
+  .prompt-actions { flex-direction: column; gap: 12px; align-items: stretch; }
+  .run-btn { justify-content: center; }
+  .runtime-stage { height: 260px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============ FIXED 3D BACKGROUND ============ -->
+<canvas id="bg-canvas"></canvas>
+<div class="bg-fade"></div>
+
+<!-- ============ NAV ============ -->
+<nav>
+  <div class="logo">
+    <div class="logo-mark"></div>
+    <span>Yash's Agent</span>
+  </div>
+  <div class="links">
+    <a data-jump="run">Run</a>
+    <a data-jump="arch">Architecture</a>
+    <a data-jump="stages">Stages</a>
+    <a data-jump="checkpoints">Checkpoints</a>
+    <a data-jump="memory">Memory</a>
+  </div>
+  <button id="settingsBtn" class="settings-btn" title="Configure Jira credentials">⚙ Settings</button>
+  <div class="status-pill" id="statusPill">
+    <span class="dot"></span>
+    <span id="statusText">connecting…</span>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <!-- Floating cartoon robots -->
+  <svg class="float-bot a" viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="bodyA" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#1e1a3a"/>
+        <stop offset="50%" stop-color="#0a0b14"/>
+        <stop offset="100%" stop-color="#05050b"/>
+      </linearGradient>
+      <linearGradient id="headA" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#2a2547"/>
+        <stop offset="100%" stop-color="#0a0b14"/>
+      </linearGradient>
+      <radialGradient id="eyeA" cx="0.5" cy="0.5" r="0.5">
+        <stop offset="0%" stop-color="#ec4899"/>
+        <stop offset="60%" stop-color="#a855f7"/>
+        <stop offset="100%" stop-color="transparent"/>
+      </radialGradient>
+    </defs>
+    <rect x="44" y="110" rx="36" ry="36" width="112" height="110" fill="url(#bodyA)" stroke="#2a2547"/>
+    <circle cx="100" cy="150" r="8" fill="url(#eyeA)"/>
+    <circle cx="100" cy="150" r="3" fill="#fff" opacity="0.9"/>
+    <rect x="52" y="30" rx="44" ry="48" width="96" height="88" fill="url(#headA)" stroke="#2a2547"/>
+    <rect x="62" y="58" rx="22" ry="22" width="76" height="38" fill="#05050b"/>
+    <circle cx="83" cy="77" r="4.5" fill="url(#eyeA)"/>
+    <circle cx="117" cy="77" r="4.5" fill="url(#eyeA)"/>
+    <line x1="100" y1="30" x2="100" y2="14" stroke="#a855f7" stroke-width="2.5"/>
+    <circle cx="100" cy="11" r="4" fill="#ec4899">
+      <animate attributeName="r" values="4;5;4" dur="1.6s" repeatCount="indefinite"/>
+    </circle>
+    <rect x="90" y="112" width="20" height="10" fill="#0a0b14"/>
+  </svg>
+
+  <svg class="float-bot b" viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="bodyB" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#2d1b3d"/>
+        <stop offset="100%" stop-color="#0a0b14"/>
+      </linearGradient>
+      <radialGradient id="eyeB" cx="0.5" cy="0.5" r="0.5">
+        <stop offset="0%" stop-color="#22d3ee"/>
+        <stop offset="70%" stop-color="#a855f7"/>
+        <stop offset="100%" stop-color="transparent"/>
+      </radialGradient>
+    </defs>
+    <rect x="50" y="110" rx="34" ry="34" width="100" height="106" fill="url(#bodyB)" stroke="#2a2547"/>
+    <circle cx="100" cy="148" r="9" fill="url(#eyeB)"/>
+    <rect x="56" y="36" rx="42" ry="44" width="88" height="82" fill="url(#bodyB)" stroke="#2a2547"/>
+    <rect x="66" y="60" rx="20" ry="20" width="68" height="34" fill="#05050b"/>
+    <ellipse cx="83" cy="77" rx="5" ry="4" fill="url(#eyeB)"/>
+    <ellipse cx="117" cy="77" rx="5" ry="4" fill="url(#eyeB)"/>
+    <path d="M86 98 Q100 104 114 98" fill="none" stroke="#22d3ee" stroke-width="2" stroke-linecap="round"/>
+    <rect x="44" y="68" width="10" height="20" rx="4" fill="#1a1d2e"/>
+    <rect x="146" y="68" width="10" height="20" rx="4" fill="#1a1d2e"/>
+  </svg>
+
+  <div class="hero-content">
+    <div class="tag">
+      <span class="tag-beta">YASH</span>
+      <span>Local-first · Ollama · No API keys</span>
+    </div>
+    <h1>
+      <span class="line">Yash's Agent — from idea to</span>
+      <span class="line grad">app, instantly.</span>
+    </h1>
+    <p class="sub">A five-stage SDLC pipeline built by Yash. A meta-planner decides which steps run. A ChromaDB memory remembers every build. All powered by Ollama on your Mac.</p>
+
+    <div class="prompt-wrap">
+      <div class="prompt-glow"></div>
+      <div class="prompt-card">
+        <textarea id="ideaInput" placeholder="Tell Yash's Agent what to build..."></textarea>
+        <div id="resumeBanner" class="resume-banner" hidden>
+          <span class="resume-dot"></span>
+          <div class="resume-text">
+            <strong>Resuming</strong> — <span id="resumeDone">—</span> already done, continuing from <span id="resumeNext">—</span>.
+          </div>
+          <label class="fresh-check">
+            <input type="checkbox" id="freshCheck" /> Start fresh
+          </label>
+        </div>
+        <div class="prompt-actions">
+          <div class="mode-toggle">
+            <button class="mode-btn active" data-mode="orchestrated">Orchestrated</button>
+            <button class="mode-btn" data-mode="linear">Linear</button>
+          </div>
+          <button class="run-btn" id="runBtn">
+            <span>Build app</span>
+            <span class="arr">→</span>
+          </button>
+          <button class="stop-btn" id="stopBtn" title="Pauses at the next stage boundary. Progress is saved — resume anytime." hidden>
+            <span class="stop-dot"></span>
+            <span>Pause</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="examples">
+      <button class="example-chip">Water intake tracker with daily reminders</button>
+      <button class="example-chip">Receipt scanner with category breakdown</button>
+      <button class="example-chip">Habit tracker with streaks</button>
+      <button class="example-chip">Offline recipe book</button>
+    </div>
+
+    <div class="stats-band">
+      <div class="stat"><div class="v" id="statStages">5</div><div class="l">SDLC Stages</div></div>
+      <div class="stat"><div class="v" id="statPatterns">—</div><div class="l">Pattern chunks</div></div>
+      <div class="stat"><div class="v" id="statMemory">—</div><div class="l">Past runs</div></div>
+      <div class="stat"><div class="v">1</div><div class="l">Ollama model</div></div>
+    </div>
+  </div>
+</section>
+
+<main>
+
+<!-- ============ RUN PANEL ============ -->
+<section id="run">
+  <h2>Live run</h2>
+  <p class="lead">Watch the meta-planner decide which stages to execute. A 3D robot orchestrates the work live.</p>
+
+  <div class="run-panel">
+    <!-- Runtime 3D robot scene -->
+    <div class="runtime-stage">
+      <canvas id="run-canvas"></canvas>
+      <div class="runtime-overlay">
+        <div class="runtime-header">
+          <div class="runtime-status" id="runtimeStatus">
+            <span class="beacon"></span>
+            <span id="runtimeText">awaiting input</span>
+          </div>
+          <div style="text-align:right;">
+            <div class="runtime-stage-label">Current stage <span id="runtimeStage">—</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="runtime-title" id="runtimeTitle">Yash's Agent — idle</div>
+          <div class="runtime-hint" id="runtimeHint">When you click Build app, this robot comes alive and orchestrates each stage.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stage cards -->
+    <div class="stages" id="stagesGrid">
+      <div class="stage-card stage-1" data-stage="analysis">
+        <div class="stage-ring"></div>
+        <div class="stage-check">✓</div>
+        <div class="stage-header"><div class="stage-num">1</div><div><div class="stage-name">Deepika (Analysis)</div></div></div>
+        <div class="stage-desc">RAG + memory + market research → requirements JSON.</div>
+        <div class="stage-time"></div>
+      </div>
+      <div class="stage-card stage-2" data-stage="planning">
+        <div class="stage-ring"></div>
+        <div class="stage-check">✓</div>
+        <div class="stage-header"><div class="stage-num">2</div><div class="stage-name">Aditi (Planning)</div></div>
+        <div class="stage-desc">Decompose into numbered task list.</div>
+        <div class="stage-time"></div>
+      </div>
+      <div class="stage-card stage-3" data-stage="design">
+        <div class="stage-ring"></div>
+        <div class="stage-check">✓</div>
+        <div class="stage-header"><div class="stage-num">3</div><div class="stage-name">Alia (Design)</div></div>
+        <div class="stage-desc">Screens, models, architecture, dependencies.</div>
+        <div class="stage-time"></div>
+      </div>
+      <div class="stage-card stage-4" data-stage="coding">
+        <div class="stage-ring"></div>
+        <div class="stage-check">✓</div>
+        <div class="stage-header"><div class="stage-num">4</div><div class="stage-name">Priyanka (Coding)</div></div>
+        <div class="stage-desc">Create project + generate source + analyzer fixes.</div>
+        <div class="stage-time"></div>
+      </div>
+      <div class="stage-card stage-5" data-stage="testing">
+        <div class="stage-ring"></div>
+        <div class="stage-check">✓</div>
+        <div class="stage-header"><div class="stage-num">5</div><div class="stage-name">Katrina (Testing)</div></div>
+        <div class="stage-desc">Generate tests, run suite, report pass/fail.</div>
+        <div class="stage-time"></div>
+      </div>
+    </div>
+
+    <div class="output-grid">
+      <div class="terminal">
+        <div class="panel-head">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span>agent stream</span>
+        </div>
+        <div class="terminal-body" id="logBox">
+          <div class="log-line" style="color:var(--muted-2);">Waiting for your first run...<span class="cursor"></span></div>
+        </div>
+      </div>
+      <div class="plan-panel">
+        <div class="panel-head">
+          <span>meta-planner</span>
+          <span id="planRationale" style="color:var(--muted);text-transform:none;letter-spacing:normal;font-size:10px;"></span>
+        </div>
+        <div class="plan-body" id="planBox">
+          <div style="color:var(--muted-2);padding:10px 0;">No plan yet. Run the agent to see which stages it decides to execute.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ARCHITECTURE ============ -->
+<section id="arch">
+  <h2>Built on proven patterns</h2>
+  <p class="lead">Yash's five-stage SDLC pipeline, distilled from the AppAspect Agentic AI curriculum and applied end-to-end on-device.</p>
+
+  <!-- Decorative robots beside the grid -->
+  <svg class="deco-bot left" viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="decoA" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#2d1a3d"/>
+        <stop offset="100%" stop-color="#0a0b14"/>
+      </linearGradient>
+      <radialGradient id="decoE" cx="0.5" cy="0.5" r="0.5">
+        <stop offset="0%" stop-color="#f59e0b"/>
+        <stop offset="70%" stop-color="#ec4899"/>
+        <stop offset="100%" stop-color="transparent"/>
+      </radialGradient>
+    </defs>
+    <rect x="48" y="112" rx="32" ry="32" width="104" height="108" fill="url(#decoA)" stroke="#2a2547"/>
+    <circle cx="100" cy="150" r="9" fill="url(#decoE)"/>
+    <rect x="54" y="36" rx="42" ry="44" width="92" height="84" fill="url(#decoA)" stroke="#2a2547"/>
+    <rect x="64" y="60" rx="20" ry="20" width="72" height="36" fill="#05050b"/>
+    <circle cx="83" cy="78" r="5" fill="url(#decoE)"/>
+    <circle cx="117" cy="78" r="5" fill="url(#decoE)"/>
+    <line x1="100" y1="36" x2="92" y2="16" stroke="#ec4899" stroke-width="2.5"/>
+    <circle cx="90" cy="14" r="4" fill="#f59e0b"><animate attributeName="r" values="4;5;4" dur="1.4s" repeatCount="indefinite"/></circle>
+  </svg>
+
+  <div class="feature-grid" id="featureGrid">
+    <div class="feature-card" style="--f-a:#a855f7;--f-b:#ec4899;">
+      <div class="ic">M</div>
+      <h3>Meta-planner + executor</h3>
+      <p>Day 3 pattern applied at the stage level. An LLM decides <em>which</em> stages to run for your specific idea. The executor validates prereqs and runs each one.</p>
+    </div>
+    <div class="feature-card" style="--f-a:#6366f1;--f-b:#22d3ee;">
+      <div class="ic">R</div>
+      <h3>RAG over patterns + memory</h3>
+      <p>Two ChromaDB collections: <code>appaspect_patterns</code> for curated engineering knowledge, <code>agent_memory</code> for every past run. Both queried during analysis.</p>
+    </div>
+    <div class="feature-card" style="--f-a:#f59e0b;--f-b:#ec4899;">
+      <div class="ic">L</div>
+      <h3>Local LLM via Ollama</h3>
+      <p>Runs 100% on your machine. No API keys, no rate limits. Per-stage model selection in <code>config.py</code>.</p>
+    </div>
+    <div class="feature-card" style="--f-a:#14b8a6;--f-b:#6366f1;">
+      <div class="ic">T</div>
+      <h3>Tool-using ReAct agents</h3>
+      <p>Analysis and Coding stages use ReAct loops with file ops, CLI tools, and RAG retrieval. Every tool follows the Day 2 five principles.</p>
+    </div>
+  </div>
+
+  <svg class="deco-bot right" viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="decoB" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#1a2a3d"/>
+        <stop offset="100%" stop-color="#0a0b14"/>
+      </linearGradient>
+      <radialGradient id="decoE2" cx="0.5" cy="0.5" r="0.5">
+        <stop offset="0%" stop-color="#22d3ee"/>
+        <stop offset="70%" stop-color="#6366f1"/>
+        <stop offset="100%" stop-color="transparent"/>
+      </radialGradient>
+    </defs>
+    <rect x="50" y="110" rx="32" ry="32" width="100" height="106" fill="url(#decoB)" stroke="#2a2547"/>
+    <circle cx="100" cy="148" r="8" fill="url(#decoE2)"/>
+    <rect x="56" y="40" rx="42" ry="44" width="88" height="82" fill="url(#decoB)" stroke="#2a2547"/>
+    <rect x="66" y="62" rx="20" ry="20" width="68" height="34" fill="#05050b"/>
+    <circle cx="84" cy="80" r="4.5" fill="url(#decoE2)"/>
+    <circle cx="116" cy="80" r="4.5" fill="url(#decoE2)"/>
+    <path d="M84 98 Q100 92 116 98" fill="none" stroke="#22d3ee" stroke-width="2" stroke-linecap="round"/>
+    <rect x="42" y="70" width="12" height="22" rx="5" fill="#1a1d2e"/>
+    <rect x="146" y="70" width="12" height="22" rx="5" fill="#1a1d2e"/>
+  </svg>
+</section>
+
+<!-- ============ STAGE REGISTRY ============ -->
+<section id="stages">
+  <h2>Stage registry</h2>
+  <p class="lead">What the meta-planner sees when deciding which stages to run. Pulled live from <code style="color:var(--accent);font-family:'JetBrains Mono',monospace;">/api/stages</code>.</p>
+  <div class="memory-list" id="stageList">
+    <div class="memory-empty">Loading stages...</div>
+  </div>
+</section>
+
+<!-- ============ CHECKPOINTS ============ -->
+<section id="checkpoints">
+  <h2>Checkpoints</h2>
+  <p class="lead">Interrupted runs are automatically saved here. Click <strong>Resume</strong> to continue from where it stopped, or <strong>Delete</strong> to start that idea fresh.</p>
+  <div class="memory-list" id="checkpointList">
+    <div class="memory-empty">No saved checkpoints. Runs are auto-saved after every completed stage.</div>
+  </div>
+</section>
+
+<!-- ============ MEMORY ============ -->
+<section id="memory">
+  <h2>Agent memory</h2>
+  <p class="lead">Every completed run is embedded and stored. The planner retrieves similar past runs before deciding what to do for a new idea.</p>
+  <div class="memory-list" id="memoryList">
+    <div class="memory-empty">Loading memory...</div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  Yash's Agent · Local-first app builder · Built with Ollama, ChromaDB, Three.js &amp; Flask
+</footer>
+
+<!-- ============ SETTINGS MODAL ============ -->
+<div id="settingsOverlay" class="finish-overlay" hidden>
+  <div class="settings-card">
+
+    <!-- Header -->
+    <div class="settings-head">
+      <div class="settings-head-icon">⚙</div>
+      <div class="settings-head-text">
+        <h2>Settings</h2>
+        <p>Configure project output, Flutter options, and Jira sync. Stored in-memory — restart loses values, use <code>.env</code> for persistence.</p>
+      </div>
+      <button class="settings-x" id="settingsCloseBtn" aria-label="Close">✕</button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="settings-tabs" role="tablist">
+      <button class="settings-tab active" data-tab="project">📦 Project</button>
+      <button class="settings-tab" data-tab="jira">🪪 Jira</button>
+      <button class="settings-tab" data-tab="advanced">⚡ Advanced</button>
+      <button class="settings-tab" data-tab="diagnose">🩺 Diagnostics</button>
+    </div>
+
+    <!-- Body -->
+    <div class="settings-body">
+
+      <!-- Tab: Project -->
+      <div class="settings-tab-pane active" data-pane="project">
+        <div class="field">
+          <label class="field-label" for="cfgOutputDir">Output directory</label>
+          <p class="field-hint">Where generated Flutter projects are saved.</p>
+          <div class="field-row">
+            <input id="cfgOutputDir" type="text" placeholder="~/Documents/claude ai" />
+            <button id="cfgPickFolderBtn" type="button" class="btn-ghost">📁 Browse</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="cfgOrg">Flutter organization</label>
+          <p class="field-hint">Used by <code>flutter create --org</code>. Becomes the package prefix (e.g. <code>com.example.your_app</code>).</p>
+          <input id="cfgOrg" type="text" placeholder="com.example" />
+        </div>
+      </div>
+
+      <!-- Tab: Jira -->
+      <div class="settings-tab-pane" data-pane="jira">
+        <div class="field toggle-field">
+          <div>
+            <span class="field-label">Enable Jira sync</span>
+            <p class="field-hint">Off → pipeline runs without creating any Jira tasks. On → all 5 agents pre-create main tasks + subtasks and auto-transition them.</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="jiraEnabled" />
+            <span class="switch-slider"></span>
+          </label>
+        </div>
+        <div id="jiraFieldsWrap">
+        <div class="field">
+          <label class="field-label" for="jiraBaseUrl">Base URL</label>
+          <p class="field-hint">Your Atlassian Cloud workspace URL.</p>
+          <input id="jiraBaseUrl" type="text" placeholder="https://your-org.atlassian.net" />
+        </div>
+
+        <div class="field-grid-2">
+          <div class="field">
+            <label class="field-label" for="jiraEmail">Email</label>
+            <p class="field-hint">Atlassian account email.</p>
+            <input id="jiraEmail" type="email" placeholder="you@example.com" />
+          </div>
+          <div class="field">
+            <label class="field-label" for="jiraProject">Project key</label>
+            <p class="field-hint">e.g. <code>SCRUM</code></p>
+            <input id="jiraProject" type="text" placeholder="SCRUM" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label field-label-row" for="jiraToken">
+            <span>API Token</span>
+            <a href="https://id.atlassian.com/manage-profile/security/api-tokens" target="_blank" class="field-link">Create token →</a>
+          </label>
+          <p class="field-hint">Token never echoed back. Leave blank when re-saving to keep existing.</p>
+          <input id="jiraToken" type="password" placeholder="••••••••••••••••••••" />
+        </div>
+
+        <button id="settingsTestBtn" class="btn-ghost btn-block">⚡ Test connection</button>
+        </div><!-- /jiraFieldsWrap -->
+      </div>
+
+      <!-- Tab: Advanced -->
+      <div class="settings-tab-pane" data-pane="advanced">
+        <div class="field">
+          <label class="field-label" for="cfgMaxRework">Max rework iterations</label>
+          <p class="field-hint">Coding ↔ testing fix-loop ceiling. Higher = more retries on bugs.</p>
+          <input id="cfgMaxRework" type="number" min="0" max="20" placeholder="5" />
+        </div>
+      </div>
+
+      <!-- Tab: Diagnostics -->
+      <div class="settings-tab-pane" data-pane="diagnose">
+        <div class="field">
+          <label class="field-label">System health checks</label>
+          <p class="field-hint">Verify Ollama, ChromaDB, Flutter CLI, output dir + Jira are configured correctly.</p>
+          <button id="diagnoseRunBtn" class="btn-primary btn-block">▶  Run all checks</button>
+        </div>
+        <div id="diagnoseResults" class="diag-results" hidden></div>
+      </div>
+
+      <!-- Status banner -->
+      <div id="settingsStatus" class="settings-status"></div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="settings-foot">
+      <button id="settingsClearBtn" class="btn-ghost" style="color:var(--err);border-color:rgba(248,113,113,0.3);">Forget on this browser</button>
+      <div class="settings-foot-actions">
+        <button id="settingsCloseBtn2" class="btn-ghost">Cancel</button>
+        <button class="btn-primary" id="settingsSaveBtn">Save changes</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============ COMPLETION OVERLAY (modal) ============ -->
+<div id="finishOverlay" class="finish-overlay" hidden>
+  <div class="finish-card" id="finishCard">
+    <div class="finish-icon" id="finishIcon">✓</div>
+    <div class="finish-title" id="finishTitle">Build complete</div>
+    <div class="finish-sub" id="finishSub">Your app is ready.</div>
+    <div class="finish-stats">
+      <div class="finish-stat"><div class="v" id="finishStages">0</div><div class="l">Stages</div></div>
+      <div class="finish-stat"><div class="v" id="finishDuration">—</div><div class="l">Duration</div></div>
+      <div class="finish-stat"><div class="v" id="finishRework">0</div><div class="l">Rework loops</div></div>
+    </div>
+    <div class="finish-path" id="finishPath">—</div>
+    <div class="finish-cmd">
+      <span>Run it: <code id="finishCmd">cd ~/Documents/claude\ ai/app &amp;&amp; flutter pub get &amp;&amp; flutter run</code></span>
+      <button class="copy-btn" id="finishCopy">Copy</button>
+    </div>
+    <div class="finish-actions">
+      <button id="finishViewLogs">View logs</button>
+      <button class="primary" id="finishResume" hidden>Resume ▶</button>
+      <button class="primary" id="finishClose">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ THREE.JS GALAXY BG + RUNTIME ROBOT ============ -->
+<script type="importmap">
+{ "imports": { "three": "https://esm.sh/three@0.160.0" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+
+// ============== FIXED BG — PLANET WITH RINGS ==============
+{
+  const canvas = document.getElementById('bg-canvas');
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'high-performance' });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 100);
+  camera.position.set(0, 0, 10);
+  camera.lookAt(0, 0, 0);
+
+  // ---- Particle allocation: 55% planet body, 45% ring system ----
+  const TOTAL = 20000;
+  const PLANET_COUNT = Math.floor(TOTAL * 0.55);          // dense, solid-looking sphere
+  const RING_COUNT   = TOTAL - PLANET_COUNT;
+  const positions = new Float32Array(TOTAL * 3);
+  const colors    = new Float32Array(TOTAL * 3);
+  const sizes     = new Float32Array(TOTAL);
+
+  // Warm magma palette for the planet
+  const planetPalette = ['#f59e0b', '#ec4899', '#a855f7', '#f97316', '#fb923c'].map(c => new THREE.Color(c));
+  // Cool icy palette for the rings
+  const ringPalette   = ['#22d3ee', '#6366f1', '#a78bfa', '#93c5fd'].map(c => new THREE.Color(c));
+
+  const PLANET_RADIUS = 1.7;                              // large enough to dominate, small enough not to crop
+  // Three ring bands with visible Cassini-style gaps — kept tighter so the whole system fits on screen
+  const RING_BANDS = [
+    { inner: 2.3, outer: 2.9 },
+    { inner: 3.1, outer: 3.7 },
+    { inner: 3.9, outer: 4.5 },
+  ];
+
+  // 1) Planet — VOLUMETRIC distribution (clustered toward center) for a solid look
+  for (let i = 0; i < PLANET_COUNT; i++) {
+    const theta = Math.random() * Math.PI * 2;
+    const phi   = Math.acos(2 * Math.random() - 1);
+    // Bias toward the surface for that "glowing rim" effect, but keep interior filled
+    const u = Math.random();
+    const r = PLANET_RADIUS * Math.pow(u, 0.35);          // 0.35 power => denser near surface
+    positions[i*3]   = r * Math.sin(phi) * Math.cos(theta);
+    positions[i*3+1] = r * Math.cos(phi);
+    positions[i*3+2] = r * Math.sin(phi) * Math.sin(theta);
+
+    const c = planetPalette[Math.floor(Math.random() * planetPalette.length)];
+    // Brighter particles closer to the surface (gives a Fresnel-like glow)
+    const brightness = 0.6 + 0.4 * (r / PLANET_RADIUS);
+    colors[i*3]   = Math.min(1, c.r * brightness * 1.1);
+    colors[i*3+1] = Math.min(1, c.g * brightness * 1.1);
+    colors[i*3+2] = Math.min(1, c.b * brightness * 1.1);
+    sizes[i] = Math.random() * 0.05 + 0.04;                // bigger than before
+  }
+
+  // 2) Rings — flat disc with three bands and inter-band gaps
+  for (let i = 0; i < RING_COUNT; i++) {
+    const idx  = PLANET_COUNT + i;
+    const band = RING_BANDS[Math.floor(Math.random() * RING_BANDS.length)];
+    const r    = band.inner + Math.random() * (band.outer - band.inner);
+    const a    = Math.random() * Math.PI * 2;
+    const y    = (Math.random() - 0.5) * 0.06;
+    positions[idx*3]   = Math.cos(a) * r;
+    positions[idx*3+1] = y;
+    positions[idx*3+2] = Math.sin(a) * r;
+    const c = ringPalette[Math.floor(Math.random() * ringPalette.length)];
+    const edgeFade = 0.5 + 0.5 * Math.sin(Math.PI * (r - band.inner) / (band.outer - band.inner));
+    colors[idx*3]   = c.r * edgeFade;
+    colors[idx*3+1] = c.g * edgeFade;
+    colors[idx*3+2] = c.b * edgeFade;
+    sizes[idx] = Math.random() * 0.028 + 0.014;
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geometry.setAttribute('color',    new THREE.BufferAttribute(colors, 3));
+  geometry.setAttribute('size',     new THREE.BufferAttribute(sizes, 1));
+
+  const mat = new THREE.ShaderMaterial({
+    uniforms: { uTime: { value: 0 } },
+    vertexShader: `
+      attribute float size; varying vec3 vColor;
+      uniform float uTime;
+      void main() {
+        vColor = color;
+        vec3 p = position;
+        p.y += sin(uTime * 0.5 + position.x * 0.3) * 0.06;
+        vec4 mv = modelViewMatrix * vec4(p, 1.0);
+        gl_PointSize = size * 320.0 / -mv.z;
+        gl_Position = projectionMatrix * mv;
+      }`,
+    fragmentShader: `
+      varying vec3 vColor;
+      void main() {
+        vec2 uv = gl_PointCoord - vec2(0.5);
+        float d = length(uv);
+        if (d > 0.5) discard;
+        float alpha = smoothstep(0.5, 0.0, d);
+        alpha = pow(alpha, 1.6);
+        vec3 col = vColor + vec3(pow(1.0 - d * 2.0, 4.0) * 0.8);
+        gl_FragColor = vec4(col, alpha);
+      }`,
+    transparent: true, depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    vertexColors: true,
+  });
+  const particles = new THREE.Points(geometry, mat);
+
+  // Wrap in a group so we can tilt the whole planet + rings like Saturn (~26° axial tilt)
+  const system = new THREE.Group();
+  system.add(particles);
+  system.rotation.z = 0.35;   // softer axial tilt
+  system.rotation.x = -0.25;  // angle the rings toward the camera
+  system.position.set(0, 0, 0); // explicit — system stays locked to origin
+  scene.add(system);
+
+  function resize() {
+    renderer.setSize(window.innerWidth, window.innerHeight, false);
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  let mouseX = 0, mouseY = 0, tx = 0, ty = 0;
+  window.addEventListener('mousemove', e => {
+    tx = (e.clientX / window.innerWidth - 0.5);
+    ty = (e.clientY / window.innerHeight - 0.5);
+  });
+
+  const clock = new THREE.Clock();
+  function tick() {
+    const t = clock.getElapsedTime();
+    mat.uniforms.uTime.value = t;
+    // Planet spins around its tilted axis
+    particles.rotation.y = t * 0.08;
+    // Very subtle wobble on the tilt — keeps it alive without drifting
+    system.rotation.x = -0.25 + Math.sin(t * 0.2) * 0.02;
+    // Tiny mouse parallax only (no scroll offset — keeps planet locked to viewport center)
+    mouseX += (tx - mouseX) * 0.03; mouseY += (ty - mouseY) * 0.03;
+    camera.position.x = mouseX * 0.3;
+    camera.position.y = -mouseY * 0.3;
+    camera.lookAt(0, 0, 0);
+    renderer.render(scene, camera);
+    requestAnimationFrame(tick);
+  }
+  tick();
+}
+
+// ============== RUNTIME ROBOT SCENE ==============
+// Exposes window.runtime3D with: setIdle(), setRunning(stageName), setDone(ok)
+window.runtime3D = (() => {
+  const canvas = document.getElementById('run-canvas');
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+  camera.position.set(0, 0.3, 6.2);
+
+  // ---- ROBOT ----
+  const robot = new THREE.Group();
+
+  function rounded(w, h, d, r = 0.2) {
+    const shape = new THREE.Shape();
+    shape.absarc(-w/2 + r, -h/2 + r, r, Math.PI, Math.PI * 1.5);
+    shape.absarc( w/2 - r, -h/2 + r, r, Math.PI * 1.5, Math.PI * 2);
+    shape.absarc( w/2 - r,  h/2 - r, r, 0, Math.PI * 0.5);
+    shape.absarc(-w/2 + r,  h/2 - r, r, Math.PI * 0.5, Math.PI);
+    const g = new THREE.ExtrudeGeometry(shape, { depth: d, bevelEnabled: true, bevelSize: 0.05, bevelThickness: 0.05, bevelSegments: 6, curveSegments: 8, steps: 1 });
+    g.translate(0, 0, -d/2);
+    return g;
+  }
+
+  const bodyMat  = new THREE.MeshStandardMaterial({ color: 0x0c0e1b, metalness: 0.75, roughness: 0.25 });
+  const glossMat = new THREE.MeshStandardMaterial({ color: 0x050509, metalness: 0.95, roughness: 0.1 });
+
+  const head = new THREE.Mesh(rounded(1.5, 1.3, 1.1, 0.42), glossMat);
+  head.position.set(0, 1.1, 0);
+  robot.add(head);
+
+  const visor = new THREE.Mesh(rounded(1.0, 0.5, 0.05, 0.2), new THREE.MeshBasicMaterial({ color: 0x050509 }));
+  visor.position.set(0, 1.15, 0.58);
+  robot.add(visor);
+
+  const eyeMat = new THREE.MeshBasicMaterial({ color: 0xec4899 });
+  const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.09, 32, 32), eyeMat.clone());
+  eyeL.position.set(-0.28, 1.18, 0.6);
+  const eyeR = eyeL.clone(); eyeR.position.x = 0.28;
+  eyeR.material = eyeMat.clone();
+  robot.add(eyeL, eyeR);
+
+  const body = new THREE.Mesh(rounded(1.8, 1.55, 1.05, 0.35), bodyMat);
+  body.position.set(0, -0.45, 0);
+  robot.add(body);
+
+  const chest = new THREE.Mesh(new THREE.SphereGeometry(0.16, 32, 32),
+    new THREE.MeshBasicMaterial({ color: 0xec4899 }));
+  chest.position.set(0, -0.35, 0.56);
+  robot.add(chest);
+
+  // Arms
+  const armMat = new THREE.MeshStandardMaterial({ color: 0x1a1d2e, metalness: 0.7, roughness: 0.3 });
+  const armGeo = new THREE.CapsuleGeometry(0.18, 0.8, 6, 10);
+  const armL = new THREE.Mesh(armGeo, armMat);
+  armL.position.set(-1.1, -0.4, 0.1);
+  armL.rotation.z = 0.35;
+  const armR = armL.clone();
+  armR.position.x = 1.1; armR.rotation.z = -0.35;
+  robot.add(armL, armR);
+
+  // Antenna
+  const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.5, 8), bodyMat);
+  rod.position.set(0, 2.0, 0);
+  const tip = new THREE.Mesh(new THREE.SphereGeometry(0.1, 24, 24),
+    new THREE.MeshBasicMaterial({ color: 0xec4899 }));
+  tip.position.set(0, 2.3, 0);
+  robot.add(rod, tip);
+
+  robot.scale.set(0.8, 0.8, 0.8);
+  scene.add(robot);
+
+  // ---- ORBITING STAGE ORBS (5) ----
+  const orbGroup = new THREE.Group();
+  const stageColors = [0x6366f1, 0xa855f7, 0xec4899, 0xf59e0b, 0x14b8a6];
+  const orbs = [];
+  for (let i = 0; i < 5; i++) {
+    const orb = new THREE.Mesh(new THREE.SphereGeometry(0.17, 24, 24),
+      new THREE.MeshBasicMaterial({ color: stageColors[i], transparent: true, opacity: 0.85 }));
+    // Glow sprite (second larger sphere additive)
+    const glow = new THREE.Mesh(new THREE.SphereGeometry(0.3, 20, 20),
+      new THREE.MeshBasicMaterial({ color: stageColors[i], transparent: true, opacity: 0.25, blending: THREE.AdditiveBlending, depthWrite: false }));
+    const node = new THREE.Group();
+    node.add(orb); node.add(glow);
+    node.userData.baseAngle = (i / 5) * Math.PI * 2;
+    orbGroup.add(node);
+    orbs.push(node);
+  }
+  scene.add(orbGroup);
+
+  // ---- RUNTIME PARTICLE BURST ----
+  const burstCount = 600;
+  const burstPos = new Float32Array(burstCount * 3);
+  const burstCol = new Float32Array(burstCount * 3);
+  const burstVel = new Float32Array(burstCount * 3);
+  for (let i = 0; i < burstCount; i++) {
+    burstPos[i*3] = 0; burstPos[i*3+1] = 0; burstPos[i*3+2] = 0;
+    burstCol[i*3] = 1; burstCol[i*3+1] = 0.4; burstCol[i*3+2] = 0.9;
+    const a = Math.random() * Math.PI * 2;
+    const p = Math.random() * Math.PI;
+    const s = 0.01 + Math.random() * 0.04;
+    burstVel[i*3]   = Math.sin(p) * Math.cos(a) * s;
+    burstVel[i*3+1] = Math.cos(p) * s;
+    burstVel[i*3+2] = Math.sin(p) * Math.sin(a) * s;
+  }
+  const burstGeo = new THREE.BufferGeometry();
+  burstGeo.setAttribute('position', new THREE.BufferAttribute(burstPos, 3));
+  burstGeo.setAttribute('color',    new THREE.BufferAttribute(burstCol, 3));
+  const burstMat = new THREE.PointsMaterial({ size: 0.06, vertexColors: true, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending });
+  const burst = new THREE.Points(burstGeo, burstMat);
+  scene.add(burst);
+
+  // ---- LIGHTS ----
+  const key = new THREE.DirectionalLight(0xffffff, 1.4);
+  key.position.set(4, 5, 4); scene.add(key);
+  const rimA = new THREE.DirectionalLight(0xec4899, 1.2);
+  rimA.position.set(-5, 2, 2); scene.add(rimA);
+  const rimB = new THREE.DirectionalLight(0x22d3ee, 0.9);
+  rimB.position.set(3, -3, 4); scene.add(rimB);
+  scene.add(new THREE.AmbientLight(0x404070, 0.35));
+
+  // ---- STATE ----
+  let mode = 'idle';              // idle | running | done
+  let activeStageIdx = -1;        // index 0-4
+  let targetHead = { y: 0 };
+  let headY = 0;
+  let orbRadius = 2.3;
+  let orbTargetRadius = 2.3;
+
+  function setIdle() {
+    mode = 'idle';
+    activeStageIdx = -1;
+    orbTargetRadius = 2.3;
+    chest.material.color.setHex(0xec4899);
+    tip.material.color.setHex(0xec4899);
+    eyeL.material.color.setHex(0xec4899);
+    eyeR.material.color.setHex(0xa855f7);
+    burstMat.opacity = 0;
+  }
+  function setRunning(stageName) {
+    mode = 'running';
+    const order = ['analysis','planning','design','coding','testing'];
+    activeStageIdx = order.indexOf(stageName);
+    if (activeStageIdx < 0) activeStageIdx = 0;
+    const col = stageColors[activeStageIdx];
+    chest.material.color.setHex(col);
+    tip.material.color.setHex(col);
+    eyeL.material.color.setHex(col);
+    eyeR.material.color.setHex(col);
+    orbTargetRadius = 1.8;
+    burstMat.opacity = 0.9;
+    // reset burst particles
+    for (let i = 0; i < burstCount; i++) {
+      burstPos[i*3] = 0; burstPos[i*3+1] = 0; burstPos[i*3+2] = 0;
+      const c = new THREE.Color(col);
+      burstCol[i*3] = c.r; burstCol[i*3+1] = c.g; burstCol[i*3+2] = c.b;
+    }
+    burstGeo.attributes.position.needsUpdate = true;
+    burstGeo.attributes.color.needsUpdate = true;
+  }
+  function setDone(ok) {
+    mode = 'done';
+    activeStageIdx = -1;
+    orbTargetRadius = 3.0;
+    const c = ok ? 0x4ade80 : 0xf87171;
+    chest.material.color.setHex(c);
+    tip.material.color.setHex(c);
+    eyeL.material.color.setHex(c);
+    eyeR.material.color.setHex(c);
+  }
+
+  function resize() {
+    const stage = document.querySelector('.runtime-stage');
+    const w = stage.clientWidth;
+    const h = stage.clientHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const clock = new THREE.Clock();
+  function tick() {
+    const t = clock.getElapsedTime();
+
+    // Robot subtle float + idle breathing
+    robot.position.y = Math.sin(t * 1.4) * 0.08;
+    const headTarget = mode === 'running' ? Math.sin(t * 2) * 0.12 : Math.sin(t * 0.6) * 0.05;
+    headY += (headTarget - headY) * 0.1;
+    head.rotation.z = headY;
+    head.rotation.y = Math.sin(t * 0.4) * 0.15;
+
+    // Arms subtle movement
+    const armSwing = mode === 'running' ? Math.sin(t * 6) * 0.15 : Math.sin(t * 1.2) * 0.04;
+    armL.rotation.z = 0.35 + armSwing;
+    armR.rotation.z = -0.35 - armSwing;
+
+    // Full-body rotation
+    robot.rotation.y = Math.sin(t * 0.35) * 0.3;
+
+    // Orbit radius smoothing
+    orbRadius += (orbTargetRadius - orbRadius) * 0.08;
+
+    // Orbs orbit
+    const speed = mode === 'running' ? 1.6 : 0.45;
+    orbs.forEach((node, i) => {
+      const base = node.userData.baseAngle;
+      const ang = base + t * speed;
+      const yOff = Math.sin(t * 1.2 + i) * 0.4;
+      node.position.x = Math.cos(ang) * orbRadius;
+      node.position.y = yOff;
+      node.position.z = Math.sin(ang) * orbRadius;
+      // pulse active orb
+      const isActive = i === activeStageIdx && mode === 'running';
+      const targetScale = isActive ? 1.5 + Math.sin(t * 6) * 0.2 : 1;
+      node.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.12);
+      node.children.forEach(c => {
+        const m = c.material;
+        if (isActive) m.opacity = Math.min(1.0, (m.opacity || 0.3) + 0.02);
+      });
+    });
+    orbGroup.rotation.y = t * 0.1;
+
+    // Burst particle update (when running)
+    if (mode === 'running') {
+      for (let i = 0; i < burstCount; i++) {
+        burstPos[i*3]   += burstVel[i*3];
+        burstPos[i*3+1] += burstVel[i*3+1];
+        burstPos[i*3+2] += burstVel[i*3+2];
+        const d2 = burstPos[i*3]**2 + burstPos[i*3+1]**2 + burstPos[i*3+2]**2;
+        if (d2 > 9) {
+          // respawn
+          burstPos[i*3] = 0; burstPos[i*3+1] = -0.4; burstPos[i*3+2] = 0;
+        }
+      }
+      burstGeo.attributes.position.needsUpdate = true;
+      burstMat.opacity = Math.min(0.9, burstMat.opacity + 0.02);
+    } else {
+      burstMat.opacity *= 0.92;
+    }
+
+    renderer.render(scene, camera);
+    requestAnimationFrame(tick);
+  }
+  tick();
+
+  return { setIdle, setRunning, setDone };
+})();
+runtime3D.setIdle();
+</script>
+
+<!-- ============ AGENT CONTROL + SSE ============ -->
+<script>
+// ----- Smooth nav -----
+document.querySelectorAll('nav .links a').forEach(a => {
+  a.addEventListener('click', () => {
+    document.getElementById(a.dataset.jump)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+
+// ----- 3D tilt on feature cards -----
+document.querySelectorAll('.feature-card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width;
+    const y = (e.clientY - r.top) / r.height;
+    const rx = (y - 0.5) * -10;
+    const ry = (x - 0.5) * 14;
+    card.style.transform = `perspective(1400px) rotateX(${rx}deg) rotateY(${ry}deg) translateZ(6px)`;
+  });
+  card.addEventListener('mouseleave', () => {
+    card.style.transform = 'perspective(1400px) rotateX(0deg) rotateY(0deg)';
+  });
+});
+
+// ----- Stage dom cache -----
+const stageEls = {};
+document.querySelectorAll('.stage-card').forEach(el => stageEls[el.dataset.stage] = el);
+const logBox = document.getElementById('logBox');
+const planBox = document.getElementById('planBox');
+const planRationale = document.getElementById('planRationale');
+const runBtn = document.getElementById('runBtn');
+const stopBtn = document.getElementById('stopBtn');
+const ideaInput = document.getElementById('ideaInput');
+
+// ----- Stop button + run tracking -----
+let _currentIdea = '';
+let _runStartedAt = 0;
+let _reworkCount = 0;
+stopBtn.addEventListener('click', async () => {
+  stopBtn.disabled = true;
+  stopBtn.querySelector('span:last-child').textContent = 'Pausing…';
+  addLog('[CLIENT] Pause requested — finishing the current stage, then saving.');
+  try {
+    await fetch('/api/stop', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idea: _currentIdea }),
+    });
+  } catch (e) {
+    addLog('[CLIENT] Pause failed: ' + e.message);
+    stopBtn.disabled = false;
+    stopBtn.querySelector('span:last-child').textContent = 'Pause';
+  }
+});
+const rtStatus = document.getElementById('runtimeStatus');
+const rtText = document.getElementById('runtimeText');
+const rtStage = document.getElementById('runtimeStage');
+const rtTitle = document.getElementById('runtimeTitle');
+const rtHint = document.getElementById('runtimeHint');
+
+const STAGE_TITLES = {
+  analysis: 'Deepika: Analyzing the idea',
+  planning: 'Aditi: Planning the work',
+  design:   'Alia: Designing the app',
+  coding:   'Priyanka: Writing the code',
+  testing:  'Katrina: Running the tests',
+};
+const STAGE_HINTS = {
+  analysis: 'Querying memory, patterns, and market signals.',
+  planning: 'Decomposing the goal into executable steps.',
+  design:   'Producing screens, data models, architecture.',
+  coding:   'Generating source files, running the analyzer.',
+  testing:  'Generating tests, running the suite.',
+};
+
+let mode = 'orchestrated';
+document.querySelectorAll('.mode-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.mode-btn').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    mode = b.dataset.mode;
+  });
+});
+document.querySelectorAll('.example-chip').forEach(c =>
+  c.addEventListener('click', () => {
+    ideaInput.value = c.textContent;
+    ideaInput.focus();
+    checkResumable();
+  })
+);
+
+// ----- Resume banner: live match against saved checkpoints -----
+const resumeBanner = document.getElementById('resumeBanner');
+const resumeDoneEl = document.getElementById('resumeDone');
+const resumeNextEl = document.getElementById('resumeNext');
+const freshCheck = document.getElementById('freshCheck');
+let _allCheckpoints = [];
+let _resumeDebounce = null;
+
+function checkResumable() {
+  const idea = ideaInput.value.trim();
+  if (!idea) { resumeBanner.hidden = true; return; }
+  const match = _allCheckpoints.find(c => c.idea.trim() === idea);
+  if (!match || match.stages_done.length === 0) {
+    resumeBanner.hidden = true;
+    return;
+  }
+  resumeBanner.hidden = false;
+  resumeDoneEl.textContent = match.stages_done.join(' + ') || 'nothing';
+  resumeNextEl.textContent = match.next_stage;
+}
+ideaInput.addEventListener('input', () => {
+  clearTimeout(_resumeDebounce);
+  _resumeDebounce = setTimeout(checkResumable, 200);
+});
+
+function setStage(name, cls) {
+  const el = stageEls[name]; if (!el) return;
+  el.classList.remove('active','done','failed','skipped');
+  if (cls) el.classList.add(cls);
+}
+function stageTime(name, t) {
+  const el = stageEls[name];
+  if (el) el.querySelector('.stage-time').textContent = t;
+}
+function resetStages() {
+  Object.values(stageEls).forEach(el => {
+    el.classList.remove('active','done','failed','skipped');
+    el.querySelector('.stage-time').textContent = '';
+  });
+}
+function addLog(text) {
+  const div = document.createElement('div');
+  div.className = 'log-line';
+  const low = text.toLowerCase();
+  if (low.includes('error') || low.includes('fail')) div.classList.add('err');
+  else if (low.includes('done') || low.includes('clean') || low.includes(' ok ') || low.includes('passed')) div.classList.add('good');
+  else if (low.includes('warn') || low.includes('skip')) div.classList.add('warn');
+  else if (text.startsWith('[') || text.startsWith('  [')) div.classList.add('accent');
+  div.textContent = text;
+  logBox.appendChild(div);
+  logBox.scrollTop = logBox.scrollHeight;
+}
+function parseStageEvent(line) {
+  const m1 = line.match(/\[EXEC\]\s+(\w+):\s+(\w+)(?:\s+in\s+([\d.]+)s)?/);
+  if (m1) {
+    const [, name, status, t] = m1;
+    if (status === 'ok') { setStage(name, 'done'); stageTime(name, t ? t + 's' : ''); }
+    else if (status === 'error' || status === 'empty_output') setStage(name, 'failed');
+    else if (status === 'skipped') setStage(name, 'skipped');
+    updatePlanItem(name, status);
+  }
+  const m2 = line.match(/\[STAGE \d+\]\s+(\w+)\s+starting/i);
+  if (m2) {
+    const name = m2[1].toLowerCase();
+    setStage(name, 'active'); updatePlanItem(name, 'running');
+    rtStage.textContent = name;
+    rtTitle.textContent = STAGE_TITLES[name] || name;
+    rtTitle.classList.add('active');
+    rtHint.textContent = STAGE_HINTS[name] || '';
+    runtime3D.setRunning(name);
+  }
+}
+
+function renderPlan(planned) {
+  planBox.innerHTML = '';
+  if (planned?.rationale) planRationale.textContent = planned.rationale;
+  const plan = planned?.plan || [];
+  if (!plan.length) { planBox.innerHTML = '<div style="color:var(--muted-2);padding:10px 0;">(no plan returned)</div>'; return; }
+  plan.forEach((s, i) => {
+    const row = document.createElement('div');
+    row.className = 'plan-item';
+    row.dataset.stage = s;
+    row.innerHTML = `<span class="stage-label">${i+1}. ${s}</span><span class="stage-badge badge-pending">pending</span>`;
+    planBox.appendChild(row);
+  });
+}
+function updatePlanItem(name, status) {
+  const row = planBox.querySelector(`[data-stage="${name}"]`);
+  if (!row) return;
+  const badge = row.querySelector('.stage-badge');
+  badge.className = 'stage-badge ' + ({ running: 'badge-running', ok: 'badge-ok', error: 'badge-err', skipped: 'badge-skip', empty_output: 'badge-err' }[status] || 'badge-pending');
+  badge.textContent = status;
+}
+
+// ----- Run via SSE -----
+runBtn.addEventListener('click', () => {
+  const idea = ideaInput.value.trim();
+  if (!idea) { ideaInput.focus(); return; }
+
+  runBtn.disabled = true;
+  runBtn.querySelector('span:first-child').textContent = 'Building...';
+  stopBtn.hidden = false;
+  stopBtn.disabled = false;
+  stopBtn.querySelector('span:last-child').textContent = 'Pause';
+  _currentIdea = idea;
+  _runStartedAt = Date.now();
+  logBox.innerHTML = '';
+  planBox.innerHTML = '<div style="color:var(--muted-2);padding:10px 0;">Planner is thinking...</div>';
+  planRationale.textContent = '';
+  resetStages();
+
+  rtStatus.classList.add('live');
+  rtText.textContent = 'agent live';
+  rtStage.textContent = 'starting';
+  rtTitle.textContent = 'Booting the pipeline';
+  rtTitle.classList.add('active');
+  rtHint.textContent = 'Meta-planner is deciding which stages to run.';
+  runtime3D.setRunning('analysis');
+
+  document.getElementById('run').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  const fresh = freshCheck.checked;
+
+  fetch('/api/run', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ idea, mode, fresh }),
+  }).then(async resp => {
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = '';
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      let idx;
+      while ((idx = buf.indexOf('\n\n')) !== -1) {
+        const chunk = buf.slice(0, idx);
+        buf = buf.slice(idx + 2);
+        handleSSE(chunk);
+      }
+    }
+  }).catch(err => {
+    addLog('[CLIENT ERROR] ' + err.message);
+    runtime3D.setDone(false);
+  }).finally(() => {
+    runBtn.disabled = false;
+    runBtn.querySelector('span:first-child').textContent = 'Build app';
+    stopBtn.hidden = true;
+    rtStatus.classList.remove('live');
+    rtText.textContent = 'run complete';
+    loadMemory();
+    loadStats();
+    loadCheckpoints();
+    freshCheck.checked = false;
+  });
+});
+
+function handleSSE(chunk) {
+  const lines = chunk.split('\n');
+  let event = 'message', data = '';
+  lines.forEach(l => {
+    if (l.startsWith('event: ')) event = l.slice(7);
+    else if (l.startsWith('data: ')) data = l.slice(6);
+  });
+  if (!data) return;
+
+  if (event === 'start') {
+    _reworkCount = 0;
+    addLog('[CLIENT] Run started — idea: ' + JSON.parse(data).idea);
+  }
+  else if (event === 'log') {
+    const text = JSON.parse(data);
+    addLog(text);
+    parseStageEvent(text);
+    const m = text.match(/\[PLANNER\] Plan \(\w+\):\s+\[([^\]]+)\]/);
+    if (m) renderPlan({ plan: m[1].split(',').map(s => s.trim().replace(/['"]/g, '')) });
+    const r = text.match(/\[PLANNER\] Rationale:\s+(.+)/);
+    if (r) planRationale.textContent = r[1];
+    if (/\[REWORK \d+/.test(text)) _reworkCount++;
+  }
+  else if (event === 'done') {
+    const payload = JSON.parse(data);
+    if (payload.plan) renderPlan(payload.plan);
+    addLog('[CLIENT] Run finished with status: ' + payload.status);
+    if (payload.project_dir) addLog('[CLIENT] Project at: ' + payload.project_dir);
+    const status = String(payload.status || '').toLowerCase();
+    const ok = status === 'complete' || status === 'ok';
+    runtime3D.setDone(ok);
+    const paused = status === 'paused' || status.includes('stopped');
+    rtTitle.textContent = ok ? 'Build complete' : paused ? 'Paused — ready to resume' : 'Build halted';
+    rtHint.textContent = payload.project_dir ? `Project at ${payload.project_dir}` : 'Check the stream above for details.';
+    rtStage.textContent = 'finished';
+    showFinishOverlay(payload);
+  }
+}
+
+// ----- Completion overlay -----
+const finishOverlay = document.getElementById('finishOverlay');
+const finishCard    = document.getElementById('finishCard');
+const finishIcon    = document.getElementById('finishIcon');
+const finishTitle   = document.getElementById('finishTitle');
+const finishSub     = document.getElementById('finishSub');
+const finishStages  = document.getElementById('finishStages');
+const finishDuration= document.getElementById('finishDuration');
+const finishRework  = document.getElementById('finishRework');
+const finishPath    = document.getElementById('finishPath');
+const finishCmd     = document.getElementById('finishCmd');
+const finishCopy    = document.getElementById('finishCopy');
+const finishClose   = document.getElementById('finishClose');
+const finishViewLogs= document.getElementById('finishViewLogs');
+
+const finishResume = document.getElementById('finishResume');
+
+function showFinishOverlay(payload) {
+  const status = String(payload.status || '').toLowerCase();
+  const paused  = status === 'paused' || status.includes('stopped');
+  const success = !paused && (status === 'complete' || status === 'ok');
+  const trace = payload.trace || [];
+  const stagesRun = trace.filter(r => r.status === 'ok').length;
+  const totalSec = Math.round((Date.now() - _runStartedAt) / 1000);
+  const mins = Math.floor(totalSec / 60), secs = totalSec % 60;
+
+  finishCard.classList.remove('success','failure','stopped');
+  finishCard.classList.add(paused ? 'stopped' : success ? 'success' : 'failure');
+  finishIcon.innerHTML = paused
+    ? '<svg viewBox="0 0 24 24" width="36" height="36" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>'
+    : success ? '✓' : '✕';
+  finishTitle.textContent = paused ? 'Paused — progress saved'
+                         : success ? 'Build complete' : 'Build halted';
+  finishSub.textContent = paused
+    ? 'You can pick up right where you left off — click Resume below.'
+    : success
+      ? 'Your app is ready. Commands below.'
+      : 'Some stages failed. Logs below have the details.';
+
+  finishStages.textContent = `${stagesRun}/${trace.length || '—'}`;
+  finishDuration.textContent = mins ? `${mins}m ${secs}s` : `${secs}s`;
+  finishRework.textContent = String(_reworkCount);
+
+  if (payload.project_dir) {
+    finishPath.textContent = payload.project_dir;
+    finishPath.hidden = false;
+    const esc = payload.project_dir.replace(/ /g, '\\ ');
+    const cmd = `cd ${esc} && flutter pub get && flutter run`;
+    finishCmd.textContent = cmd;
+    finishCmd.closest('.finish-cmd').hidden = false;
+  } else {
+    finishPath.hidden = true;
+    finishCmd.closest('.finish-cmd').hidden = true;
+  }
+
+  // Paused → show Resume button, hide Done; else show Done, hide Resume
+  finishResume.hidden = !paused;
+  finishClose.textContent = paused ? 'Close' : 'Done';
+
+  finishOverlay.hidden = false;
+}
+
+finishClose.addEventListener('click', () => { finishOverlay.hidden = true; });
+finishResume.addEventListener('click', () => {
+  finishOverlay.hidden = true;
+  ideaInput.value = _currentIdea;
+  freshCheck.checked = false;
+  checkResumable();
+  document.getElementById('run').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  setTimeout(() => runBtn.click(), 350);
+});
+finishViewLogs.addEventListener('click', () => {
+  finishOverlay.hidden = true;
+  document.getElementById('run').scrollIntoView({ behavior: 'smooth' });
+});
+finishCopy.addEventListener('click', () => {
+  const cmd = finishCmd.textContent;
+  navigator.clipboard?.writeText(cmd).then(() => {
+    finishCopy.textContent = 'Copied ✓';
+    setTimeout(() => { finishCopy.textContent = 'Copy'; }, 1500);
+  });
+});
+finishOverlay.addEventListener('click', (e) => {
+  if (e.target === finishOverlay) finishOverlay.hidden = true;
+});
+
+// ----- Settings modal (Jira creds) -----
+const settingsOverlay  = document.getElementById('settingsOverlay');
+const settingsBtn      = document.getElementById('settingsBtn');
+const settingsCloseBtn = document.getElementById('settingsCloseBtn');
+const settingsTestBtn  = document.getElementById('settingsTestBtn');
+const settingsSaveBtn  = document.getElementById('settingsSaveBtn');
+const settingsStatus   = document.getElementById('settingsStatus');
+const jiraBaseUrl      = document.getElementById('jiraBaseUrl');
+const jiraEmail        = document.getElementById('jiraEmail');
+const jiraToken        = document.getElementById('jiraToken');
+const jiraProject      = document.getElementById('jiraProject');
+
+function setSettingsStatus(text, kind) {
+  settingsStatus.className = 'settings-status' + (kind ? ' ' + kind : '');
+  settingsStatus.textContent = text || '';
+}
+
+const cfgOutputDir     = document.getElementById('cfgOutputDir');
+const cfgOrg           = document.getElementById('cfgOrg');
+const cfgMaxRework     = document.getElementById('cfgMaxRework');
+const cfgPickFolderBtn = document.getElementById('cfgPickFolderBtn');
+
+cfgPickFolderBtn.addEventListener('click', async () => {
+  cfgPickFolderBtn.disabled = true;
+  cfgPickFolderBtn.textContent = '📁 Opening…';
+  setSettingsStatus('Opening folder picker on your machine…', 'info');
+  try {
+    const r = await fetch('/api/pick-folder', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: 'Select Flutter project output directory' }),
+    }).then(r => r.json());
+    if (r.status === 'ok' && r.path) {
+      cfgOutputDir.value = r.path;
+      setSettingsStatus('Picked: ' + r.path, 'ok');
+    } else if (r.status === 'cancelled') {
+      setSettingsStatus('Cancelled.', 'info');
+    } else {
+      setSettingsStatus('Picker error: ' + (r.message || 'unknown'), 'err');
+    }
+  } catch (e) {
+    setSettingsStatus('Network error: ' + e.message, 'err');
+  } finally {
+    cfgPickFolderBtn.disabled = false;
+    cfgPickFolderBtn.textContent = '📁 Browse';
+  }
+});
+
+// Browser-local persistence so creds + config survive server restart.
+// Token sits in localStorage — local app, single user; XSS-safe since no
+// untrusted input rendered. Clear via DevTools → Application → Storage.
+const LS_KEY = 'yash_agent_settings_v1';
+function loadLocalSettings() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}'); }
+  catch { return {}; }
+}
+function saveLocalSettings(patch) {
+  const cur = loadLocalSettings();
+  const next = { ...cur, ...patch };
+  // Strip empty strings so partial saves don't blow away existing values
+  Object.keys(next).forEach(k => { if (next[k] === '' || next[k] == null) delete next[k]; });
+  localStorage.setItem(LS_KEY, JSON.stringify(next));
+}
+function clearLocalSettings() { localStorage.removeItem(LS_KEY); }
+
+// Push localStorage → server on page load so a fresh server picks up saved creds.
+async function hydrateServerFromLocal() {
+  const ls = loadLocalSettings();
+  if (!Object.keys(ls).length) return;
+  try {
+    if (ls.flutter_output_dir || ls.flutter_org || ls.max_rework != null) {
+      await fetch('/api/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          flutter_output_dir: ls.flutter_output_dir,
+          flutter_org:        ls.flutter_org,
+          max_rework:         ls.max_rework,
+        }),
+      });
+    }
+    const hasJiraCreds = ls.jira_base_url && ls.jira_email && ls.jira_token;
+    if (hasJiraCreds || typeof ls.jira_enabled === 'boolean') {
+      await fetch('/api/jira/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...(hasJiraCreds ? {
+            base_url:    ls.jira_base_url,
+            email:       ls.jira_email,
+            api_token:   ls.jira_token,
+            project_key: ls.jira_project_key || '',
+          } : {}),
+          ...(typeof ls.jira_enabled === 'boolean' ? { enabled: ls.jira_enabled } : {}),
+        }),
+      });
+    }
+  } catch { /* silent — server may still be starting */ }
+}
+
+async function openSettings() {
+  setSettingsStatus('Loading current config…', 'info');
+  try {
+    const [jira, gen] = await Promise.all([
+      fetch('/api/jira/config').then(r => r.json()),
+      fetch('/api/config').then(r => r.json()),
+    ]);
+    const ls = loadLocalSettings();
+
+    // General — server values first, fall back to localStorage
+    cfgOutputDir.value = gen.flutter_output_dir || ls.flutter_output_dir || '';
+    cfgOrg.value       = gen.flutter_org || ls.flutter_org || '';
+    cfgMaxRework.value = (gen.max_rework ?? ls.max_rework ?? 5);
+
+    // Jira — same fallback chain
+    jiraBaseUrl.value = jira.base_url || ls.jira_base_url || '';
+    jiraEmail.value   = jira.email || ls.jira_email || '';
+    jiraProject.value = jira.project_key || ls.jira_project_key || '';
+    // Token: only fill if localStorage has it AND server doesn't (server side wins)
+    jiraToken.value   = (jira.has_token ? '' : (ls.jira_token || ''));
+    // Enabled toggle — server's value wins, fall back to localStorage
+    const en = (typeof jira.enabled === 'boolean')
+                 ? jira.enabled
+                 : (typeof ls.jira_enabled === 'boolean' ? ls.jira_enabled : true);
+    jiraEnabled.checked = en;
+    document.getElementById('jiraFieldsWrap').classList.toggle('disabled', !en);
+
+    const haveToken = jira.has_token || !!ls.jira_token;
+    setSettingsStatus(
+      (jira.configured || (ls.jira_base_url && ls.jira_email && haveToken))
+        ? `Jira configured (token ${haveToken ? '✓' : '✗'}). Saved to this browser.`
+        : 'Jira not configured. Fill base URL + email + token to enable board sync.',
+      (jira.configured || haveToken) ? 'ok' : 'info'
+    );
+  } catch (e) {
+    setSettingsStatus('Failed to load config: ' + e.message, 'err');
+  }
+  settingsOverlay.hidden = false;
+}
+
+const jiraEnabled = document.getElementById('jiraEnabled');
+const jiraFieldsWrap = document.getElementById('jiraFieldsWrap');
+jiraEnabled.addEventListener('change', () => {
+  jiraFieldsWrap.classList.toggle('disabled', !jiraEnabled.checked);
+});
+
+settingsBtn.addEventListener('click', openSettings);
+settingsCloseBtn.addEventListener('click', () => { settingsOverlay.hidden = true; });
+const settingsCloseBtn2 = document.getElementById('settingsCloseBtn2');
+if (settingsCloseBtn2) settingsCloseBtn2.addEventListener('click', () => { settingsOverlay.hidden = true; });
+settingsOverlay.addEventListener('click', (e) => {
+  if (e.target === settingsOverlay) settingsOverlay.hidden = true;
+});
+
+const settingsClearBtn = document.getElementById('settingsClearBtn');
+if (settingsClearBtn) {
+  settingsClearBtn.addEventListener('click', () => {
+    if (!confirm('Clear all saved settings from this browser?\n\nServer in-memory creds also reset.')) return;
+    clearLocalSettings();
+    // Wipe server in-memory too
+    fetch('/api/jira/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ base_url: '', email: '', api_token: '' }),
+    }).catch(() => {});
+    [cfgOutputDir, cfgOrg, cfgMaxRework, jiraBaseUrl, jiraEmail, jiraToken, jiraProject].forEach(el => el.value = '');
+    setSettingsStatus('Forgotten on this browser.', 'info');
+  });
+}
+
+// Diagnostics
+const diagnoseRunBtn = document.getElementById('diagnoseRunBtn');
+const diagnoseResults = document.getElementById('diagnoseResults');
+if (diagnoseRunBtn) {
+  diagnoseRunBtn.addEventListener('click', async () => {
+    diagnoseRunBtn.disabled = true;
+    diagnoseRunBtn.textContent = '⏳  Checking…';
+    diagnoseResults.hidden = false;
+    diagnoseResults.innerHTML = '<div class="diag-row skip"><span class="diag-icon">…</span><span class="diag-label">Running checks…</span><span class="diag-detail"></span></div>';
+    try {
+      const r = await fetch('/api/diagnose').then(r => r.json());
+      diagnoseResults.innerHTML = '';
+      (r.checks || []).forEach(c => {
+        const row = document.createElement('div');
+        const cls = c.ok === true ? 'ok' : c.ok === false ? 'err' : 'skip';
+        const icon = c.ok === true ? '✓' : c.ok === false ? '✕' : '–';
+        row.className = 'diag-row ' + cls;
+        row.innerHTML = `
+          <span class="diag-icon">${icon}</span>
+          <span class="diag-label">${c.label}</span>
+          <span class="diag-detail" title="${c.detail || ''}">${c.detail || ''}</span>`;
+        diagnoseResults.appendChild(row);
+      });
+      const s = r.summary || {};
+      const summary = document.createElement('div');
+      const summaryCls = s.failed > 0 ? 'has-err' : s.passed === s.total - s.skipped ? 'all-ok' : '';
+      summary.className = 'diag-summary ' + summaryCls;
+      summary.textContent = `${s.passed}/${s.total - s.skipped} checks passed` +
+                            (s.failed ? ` · ${s.failed} failed` : '') +
+                            (s.skipped ? ` · ${s.skipped} skipped` : '');
+      diagnoseResults.appendChild(summary);
+    } catch (e) {
+      diagnoseResults.innerHTML = `<div class="diag-row err"><span class="diag-icon">✕</span><span class="diag-label">Diagnose failed</span><span class="diag-detail">${e.message}</span></div>`;
+    } finally {
+      diagnoseRunBtn.disabled = false;
+      diagnoseRunBtn.textContent = '▶  Run all checks';
+    }
+  });
+}
+
+// Tab switching
+document.querySelectorAll('.settings-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const target = tab.dataset.tab;
+    document.querySelectorAll('.settings-tab').forEach(t => t.classList.toggle('active', t === tab));
+    document.querySelectorAll('.settings-tab-pane').forEach(p =>
+      p.classList.toggle('active', p.dataset.pane === target)
+    );
+  });
+});
+
+settingsTestBtn.addEventListener('click', async () => {
+  setSettingsStatus('Testing connection…', 'info');
+  settingsTestBtn.disabled = true;
+  try {
+    const body = {
+      base_url:  jiraBaseUrl.value.trim(),
+      email:     jiraEmail.value.trim(),
+      api_token: jiraToken.value.trim(),
+    };
+    const res = await fetch('/api/jira/test', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }).then(r => r.json());
+    if (res.status === 'ok') setSettingsStatus(`OK — connected as ${res.user}`, 'ok');
+    else setSettingsStatus('Failed: ' + (res.message || 'unknown error'), 'err');
+  } catch (e) {
+    setSettingsStatus('Network error: ' + e.message, 'err');
+  } finally {
+    settingsTestBtn.disabled = false;
+  }
+});
+
+settingsSaveBtn.addEventListener('click', async () => {
+  setSettingsStatus('Saving…', 'info');
+  settingsSaveBtn.disabled = true;
+  try {
+    // 1. General config (always — even if empty fields, just send what's filled)
+    const genBody = {};
+    if (cfgOutputDir.value.trim()) genBody.flutter_output_dir = cfgOutputDir.value.trim();
+    if (cfgOrg.value.trim())       genBody.flutter_org        = cfgOrg.value.trim();
+    if (cfgMaxRework.value.trim()) genBody.max_rework         = cfgMaxRework.value.trim();
+    if (Object.keys(genBody).length) {
+      const r1 = await fetch('/api/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(genBody),
+      }).then(r => r.json());
+      if (r1.status !== 'ok') {
+        setSettingsStatus('General settings save failed: ' + (r1.message || 'unknown'), 'err');
+        settingsSaveBtn.disabled = false;
+        return;
+      }
+    }
+
+    // 2. Jira config — always sends `enabled` flag; creds only if filled
+    const jiraBody = {
+      enabled:     jiraEnabled.checked,
+      base_url:    jiraBaseUrl.value.trim(),
+      email:       jiraEmail.value.trim(),
+      project_key: jiraProject.value.trim(),
+    };
+    // Only include token if user typed one (blank = keep existing)
+    if (jiraToken.value.trim()) jiraBody.api_token = jiraToken.value.trim();
+    {
+      const r2 = await fetch('/api/jira/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(jiraBody),
+      }).then(r => r.json());
+      if (r2.status !== 'ok') {
+        setSettingsStatus('Jira save failed: ' + (r2.message || 'unknown'), 'err');
+        settingsSaveBtn.disabled = false;
+        return;
+      }
+    }
+
+    // Persist to browser localStorage so it survives server restart
+    saveLocalSettings({
+      flutter_output_dir: cfgOutputDir.value.trim() || undefined,
+      flutter_org:        cfgOrg.value.trim() || undefined,
+      max_rework:         cfgMaxRework.value.trim() ? Number(cfgMaxRework.value) : undefined,
+      jira_enabled:       jiraEnabled.checked,
+      jira_base_url:      jiraBaseUrl.value.trim() || undefined,
+      jira_email:         jiraEmail.value.trim() || undefined,
+      jira_project_key:   jiraProject.value.trim() || undefined,
+      ...(jiraToken.value.trim() ? { jira_token: jiraToken.value.trim() } : {}),
+    });
+
+    setSettingsStatus('Saved to server + this browser. Persists across restarts.', 'ok');
+  } catch (e) {
+    setSettingsStatus('Network error: ' + e.message, 'err');
+  } finally {
+    settingsSaveBtn.disabled = false;
+  }
+});
+
+// ----- Data fetchers -----
+async function loadStats() {
+  try {
+    const h = await fetch('/api/health').then(r => r.json());
+    const cols = h.vector_store?.collections || {};
+    document.getElementById('statPatterns').textContent = cols.patterns?.count ?? '—';
+    document.getElementById('statMemory').textContent = cols.memory?.count ?? '—';
+    const pill = document.getElementById('statusPill');
+    const txt = document.getElementById('statusText');
+    if (h.ollama) { pill.className = 'status-pill ok'; txt.textContent = 'ollama ready'; }
+    else { pill.className = 'status-pill err'; txt.textContent = 'ollama down'; }
+  } catch {}
+}
+async function loadStages() {
+  try {
+    const list = await fetch('/api/stages').then(r => r.json());
+    const el = document.getElementById('stageList');
+    el.innerHTML = '';
+    list.forEach((s, i) => {
+      const row = document.createElement('div');
+      row.className = 'memory-item';
+      const agent = s.agent_name ? `[${s.agent_name}] ` : '';
+      row.innerHTML = `<div class="app">${i+1}. ${agent}${s.name}</div><div class="idea">${s.description}</div><div class="ts">cost ${s.cost}</div>`;
+      el.appendChild(row);
+    });
+    document.getElementById('statStages').textContent = list.length;
+  } catch {}
+}
+async function loadMemory() {
+  try {
+    const r = await fetch('/api/memory').then(r => r.json());
+    const el = document.getElementById('memoryList');
+    if (!r.runs || r.runs.length === 0) {
+      el.innerHTML = '<div class="memory-empty">No runs yet — build your first app above and memory will populate here.</div>';
+      return;
+    }
+    el.innerHTML = '';
+    r.runs.forEach(run => {
+      const row = document.createElement('div');
+      row.className = 'memory-item';
+      row.innerHTML = `<div class="app">${run.app_name || '?'}</div><div class="idea">${run.idea || ''}</div><div class="ts">${run.timestamp || ''}</div>`;
+      el.appendChild(row);
+    });
+  } catch {}
+}
+
+// ----- Checkpoints -----
+const STAGE_ORDER = ['analysis', 'plan', 'design', 'code', 'tests'];
+
+async function loadCheckpoints() {
+  try {
+    const data = await fetch('/api/checkpoints').then(r => r.json());
+    _allCheckpoints = Array.isArray(data) ? data : [];
+    const el = document.getElementById('checkpointList');
+    if (_allCheckpoints.length === 0) {
+      el.innerHTML = '<div class="memory-empty">No saved checkpoints. Runs are auto-saved after every completed stage.</div>';
+      checkResumable();
+      return;
+    }
+    el.innerHTML = '';
+    _allCheckpoints.forEach(c => {
+      const complete = c.next_stage === 'complete';
+      const card = document.createElement('div');
+      card.className = 'checkpoint-card' + (complete ? ' complete' : '');
+      const stagesHtml = STAGE_ORDER.map(s => {
+        let klass = 'pending';
+        if (c.stages_done.includes(s)) klass = 'done';
+        else if (s === c.next_stage) klass = 'next';
+        return `<span class="cp-stage ${klass}">${s}</span>`;
+      }).join('');
+      const errs = (c.errors || []).length ? `<span style="color:var(--err)"> · ${c.errors.length} error(s)</span>` : '';
+      card.innerHTML = `
+        <div class="cp-meta">
+          <div class="cp-idea">${escapeHtml(c.idea)}</div>
+          <div class="cp-stages">${stagesHtml}</div>
+          <div class="cp-time">saved ${c.saved_at}${errs}</div>
+        </div>
+        <div class="cp-actions">
+          ${complete ? '' : '<button class="cp-btn primary" data-resume="' + escapeHtml(c.idea) + '">Resume ▶</button>'}
+          <button class="cp-btn danger" data-delete="${escapeHtml(c.idea)}">Delete</button>
+        </div>
+      `;
+      el.appendChild(card);
+    });
+    // Wire actions
+    el.querySelectorAll('[data-resume]').forEach(b =>
+      b.addEventListener('click', () => {
+        ideaInput.value = b.dataset.resume;
+        freshCheck.checked = false;
+        checkResumable();
+        document.getElementById('run').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setTimeout(() => runBtn.click(), 350);
+      })
+    );
+    el.querySelectorAll('[data-delete]').forEach(b =>
+      b.addEventListener('click', async () => {
+        if (!confirm(`Delete checkpoint for:\n\n"${b.dataset.delete}"\n\nThis cannot be undone.`)) return;
+        await fetch('/api/checkpoints', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idea: b.dataset.delete }),
+        });
+        loadCheckpoints();
+      })
+    );
+    checkResumable();
+  } catch (e) { /* silent */ }
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[c]));
+}
+
+// Hydrate server with locally-saved creds first, then load everything
+hydrateServerFromLocal().then(() => { loadStats(); loadStages(); loadMemory(); loadCheckpoints(); });
+setInterval(loadStats, 15000);
+setInterval(loadCheckpoints, 10000);
+</script>
+
+</body>
+</html>

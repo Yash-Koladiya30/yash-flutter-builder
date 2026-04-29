@@ -1,0 +1,78 @@
+# ---------- Secrets / credentials (NEVER commit) ----------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+*credentials*.json
+secrets.yaml
+secrets.json
+
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.Python
+build/
+dist/
+.venv/
+venv/
+env/
+ENV/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tox/
+
+# ---------- Vector DB / runtime data ----------
+sdlc_agent/chroma_db/
+sdlc_agent/checkpoints/
+sdlc_agent/sdlc_output/
+sdlc_agent/generated/
+sdlc_agent/logs/
+*.sqlite3
+*.db
+
+# ---------- Generated Flutter projects ----------
+# Output land in ~/Documents/claude\ ai/ which is outside repo,
+# but block any accidental in-repo flutter projects too.
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+pubspec.lock
+.idea_modules/
+*.iml
+
+# ---------- IDE / editor ----------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# ---------- macOS junk ----------
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.Spotlight-V100
+.Trashes
+
+# ---------- Logs ----------
+*.log
+/tmp/sdlc_server.log
+
+# ---------- Local Claude / agent state ----------
+.claude/
+
+# ---------- Ollama models ----------
+# (just safety — Ollama stores in ~/.ollama, not in repo)
+*.gguf
