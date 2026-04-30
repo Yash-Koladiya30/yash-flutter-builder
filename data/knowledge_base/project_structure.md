@@ -1,6 +1,6 @@
 # Flutter Project Structure
 
-Standard layout for every AppAspect Flutter app. Files under `lib/` only.
+Standard layout for every Flutter app. Files under `lib/` only.
 
 ```
 my_app/

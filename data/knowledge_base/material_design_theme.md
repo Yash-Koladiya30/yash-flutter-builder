@@ -1,6 +1,6 @@
 # Material 3 Theming
 
-Every AppAspect app uses Material 3 with a single `ColorScheme.fromSeed` source of truth.
+Every app uses Material 3 with a single `ColorScheme.fromSeed` source of truth.
 
 ## Theme configuration
 

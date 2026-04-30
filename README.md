@@ -280,7 +280,7 @@ Or open the UI → ⚙ Settings → 🩺 Diagnostics → click **Run all checks*
 
   ┌────────────────────────────┐    ┌─────────────────────────┐
   │   ChromaDB                 │    │   Ollama (localhost)     │
-  │   • appaspect_patterns     │    │   qwen2.5-coder:7b       │
+  │   • engineering_patterns     │    │   qwen2.5-coder:7b       │
   │   • agent_memory           │    │   nomic-embed-text       │
   └────────────────────────────┘    └─────────────────────────┘
 ```
@@ -492,13 +492,13 @@ flutter pub get
 flutter run
 ```
 
-Project layout follows AppAspect conventions: `lib/{models,blocs,screens,repositories}/`, snake_case files, BLoC + go_router + Hive.
+Project layout follows conventions: `lib/{models,blocs,screens,repositories}/`, snake_case files, BLoC + go_router + Hive.
 
 ---
 
 ## 🔥 What makes this different
 
-- **Day 1–5 patterns end-to-end** — ReAct loops, tool design principles, planner+executor, RAG, sequential pipeline — composed into one production-grade system
+- **patterns end-to-end** — ReAct loops, tool design principles, planner+executor, RAG, sequential pipeline — composed into one production-grade system
 - **Local-first** — no cloud LLM, no rate limits, no per-token cost
 - **Resume-safe** — pause anytime, every stage checkpointed
 - **Rework-aware** — coding stage automatically loops with testing failure context until clean
@@ -569,7 +569,7 @@ Confirm the idea string matches exactly (whitespace counts — checkpoint key is
 
 ## 🤝 Contributing
 
-PRs welcome. Spawn an issue first for big changes. The codebase follows AppAspect's Day 1–5 training patterns — see knowledge base under `sdlc_agent/knowledge_base/` for conventions.
+PRs welcome. Spawn an issue first for big changes. The codebase follows training patterns — see knowledge base under `sdlc_agent/knowledge_base/` for conventions.
 
 ---
 

@@ -1,6 +1,6 @@
 """Meta-executor: dispatches a single stage by name, with prereq validation and tracing.
 
-Day 3 executor pattern, lifted to the stage level. The planner tells it WHAT to run;
+Executor pattern, lifted to the stage level. The planner tells it WHAT to run;
 the executor handles HOW: check deps, invoke the stage module, capture timing and result.
 """
 import time

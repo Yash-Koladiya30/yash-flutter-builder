@@ -1,4 +1,4 @@
-"""Stage 4 — Coding. ReAct agent with file + CLI tools (Day 1 heavy-lifting stage).
+"""Stage 4 — Coding. ReAct agent with file + CLI tools.
 
 Approach: deterministic scaffolding (flutter create + pubspec + file generation via LLM)
 with an agent-driven fix-up loop for analyze errors. Tool-calling small local models

@@ -1,4 +1,4 @@
-"""Sequential pipeline orchestrator — Day 5 pattern."""
+"""Sequential pipeline orchestrator."""
 from core.state import initial_state
 from agents import (
     deepika  as analysis,

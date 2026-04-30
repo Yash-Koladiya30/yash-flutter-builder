@@ -1,6 +1,6 @@
 # pubspec.yaml Conventions
 
-Every AppAspect Flutter app has a `pubspec.yaml` at its root with this structure.
+Every Flutter app has a `pubspec.yaml` at its root with this structure.
 
 ## Template
 

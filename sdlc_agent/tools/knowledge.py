@@ -1,4 +1,4 @@
-"""RAG tools over the curated AppAspect pattern knowledge base (Day 4 pattern)."""
+"""RAG tools over the curated pattern knowledge base."""
 import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parent.parent))
@@ -41,7 +41,7 @@ KNOWLEDGE_TOOL_SCHEMAS = [
         'type': 'function',
         'function': {
             'name': 'retrieve_pattern',
-            'description': 'Search AppAspect pattern knowledge base (BLoC, auth, Hive, null-safety, etc).',
+            'description': 'Search pattern knowledge base (BLoC, auth, Hive, null-safety, etc).',
             'parameters': {
                 'type': 'object',
                 'properties': {
@@ -56,7 +56,7 @@ KNOWLEDGE_TOOL_SCHEMAS = [
         'type': 'function',
         'function': {
             'name': 'retrieve_similar_app',
-            'description': 'Find the closest past AppAspect project pattern for a given app idea.',
+            'description': 'Find the closest past project pattern for a given app idea.',
             'parameters': {
                 'type': 'object',
                 'properties': {'idea': {'type': 'string'}},

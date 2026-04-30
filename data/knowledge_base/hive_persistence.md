@@ -1,6 +1,6 @@
 # Hive Local Persistence
 
-AppAspect uses Hive for local storage of small/medium datasets. SQL is only used when
+We use Hive for local storage of small/medium datasets. SQL is only used when
 queries need joins or aggregation.
 
 ## Initialisation

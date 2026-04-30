@@ -1,4 +1,4 @@
-"""Shared ReAct loop (Day 1 pattern).
+"""Shared ReAct loop.
 
 Keeps a provider-neutral message history; llm.chat() translates it per-provider.
 """

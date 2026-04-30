@@ -1,6 +1,6 @@
 # Navigation — go_router
 
-AppAspect uses `go_router` for all navigation (not Navigator 1.0, not auto_route).
+We use `go_router` for all navigation (not Navigator 1.0, not auto_route).
 
 ## Setup
 

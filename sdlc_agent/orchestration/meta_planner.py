@@ -1,6 +1,6 @@
 """Meta-planner: decides which SDLC stages to run, in what order, for a given goal.
 
-Day 3 planner pattern applied one level up. Instead of decomposing a task into tool
+Planner pattern applied one level up. Instead of decomposing a task into tool
 calls, it decomposes a goal into a sequence of SDLC stages from the registry.
 """
 import json
