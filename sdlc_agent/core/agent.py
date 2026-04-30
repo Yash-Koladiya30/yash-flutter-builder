@@ -1,8 +1,8 @@
-"""Shared ReAct loop (Day 1 pattern).
+"""Shared ReAct loop.
 
 Keeps a provider-neutral message history; llm.chat() translates it per-provider.
 """
-from llm import chat
+from core.llm import chat
 
 
 def run_agent(task: str, tools: list, tool_map: dict,

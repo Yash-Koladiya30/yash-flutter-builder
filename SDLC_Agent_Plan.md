@@ -2,22 +2,22 @@
 
 An agentic system that takes a one-line app idea and produces a working Flutter project by walking through the five classical SDLC stages: **Analysis → Planning → Design → Coding → Testing**.
 
-Built on the patterns from Day 1–5 of the AppAspect Agentic AI training.
+Built on the patterns from the Agentic AI training.
 **Runs 100% locally via [Ollama](https://ollama.com) — no API keys, no cloud calls.**
 
 ---
 
 ## Pattern Mapping — Which Day Teaches What
 
-| SDLC Stage | Day 1–5 Pattern Used | Why |
+| SDLC Stage | Pattern Used | Why |
 |---|---|---|
-| Analysis | Day 1 ReAct loop + Day 4 RAG | Agent needs to explore tools (fetch reviews, read similar projects) and retrieve learned patterns |
-| Planning | Day 3 Planner | Decompose the idea into a numbered, executable task list |
-| Design | Day 5 Stage (spec) | Pure LLM call — takes research + plan, writes screens, data model, API |
-| Coding | Day 1 ReAct loop with write tools | Agent makes many tool calls: create project, write files, check output |
-| Testing | Day 5 Stage (tests) + tool loop | LLM writes tests, tool runs `flutter test`, loops if failures |
+| Analysis | ReAct loop + RAG | Agent needs to explore tools (fetch reviews, read similar projects) and retrieve learned patterns |
+| Planning | Planner | Decompose the idea into a numbered, executable task list |
+| Design | Stage (spec) | Pure LLM call — takes research + plan, writes screens, data model, API |
+| Coding | ReAct loop with write tools | Agent makes many tool calls: create project, write files, check output |
+| Testing | Stage (tests) + tool loop | LLM writes tests, tool runs `flutter test`, loops if failures |
 
-The overall orchestrator is the **Day 5 sequential pipeline with a shared state dict** — each stage reads upstream keys and writes exactly one new key.
+The overall orchestrator is the **sequential pipeline with a shared state dict** — each stage reads upstream keys and writes exactly one new key.
 
 ---
 
@@ -29,7 +29,7 @@ No Anthropic API, no OpenAI, no network egress. Everything runs on `http://local
 |---|---|---|
 | Tool-calling agent (Stages 1, 4, 5) | `qwen2.5-coder:7b` or `llama3.1:8b` | Both support native function calling and handle Dart well |
 | Planner / Designer (Stages 2, 3) | `qwen2.5:7b` or `llama3.1:8b` | Reliable structured-text output |
-| Embeddings (Day 4 RAG) | `nomic-embed-text` | 768-dim, fast, good quality on technical text |
+| Embeddings (RAG) | `nomic-embed-text` | 768-dim, fast, good quality on technical text |
 
 **One-time install:**
 
@@ -74,7 +74,7 @@ def chat(messages: list[dict], tools: list[dict] | None = None,
     return {'text': msg.get('content', ''), 'tool_calls': tool_calls, 'stop_reason': stop}
 
 def embed(text: str) -> list[float]:
-    """Real embedding — replaces the fake MD5-hash embedding from Day 4."""
+    """Real embedding — replaces the fake MD5-hash embedding."""
     return ollama.embeddings(model=EMBED_MODEL, prompt=text)['embedding']
 ```
 
@@ -83,7 +83,7 @@ This wrapper is the **only** file that talks to Ollama. Stages and tools import 
 ### ReAct loop adapted for Ollama
 
 ```python
-# agent.py — Day 1 ReAct loop, now Ollama-native
+# agent.py — ReAct loop, now Ollama-native
 from llm import chat
 
 def run_agent(task: str, tools: list, tool_map: dict, max_steps: int = 15) -> str:
@@ -133,7 +133,7 @@ sdlc_agent/
 │  ├─ __init__.py
 │  ├─ flutter_cli.py       ← flutter create / analyze / test
 │  ├─ file_ops.py          ← read_dart_file, write_dart_file, list_dir
-│  ├─ knowledge.py         ← RAG retrieval over AppAspect patterns (Day 4)
+│  ├─ knowledge.py         ← RAG retrieval over patterns
 │  └─ market_research.py   ← Play Store reviews, competitor lookup
 ├─ stages/
 │  ├─ __init__.py
@@ -145,7 +145,7 @@ sdlc_agent/
 ├─ llm.py                  ← ONE file that talks to Ollama (chat + embed)
 ├─ agent.py                ← shared ReAct loop (Stages 1 & 4 use it)
 ├─ pipeline.py             ← runs all 5 stages in order
-├─ knowledge_base/         ← seeded Day 4 docs (auth patterns, BLoC, etc.)
+├─ knowledge_base/         ← seeded docs (auth patterns, BLoC, etc.)
 └─ main.py                 ← entry point — accepts the app idea
 ```
 
@@ -173,7 +173,7 @@ Every stage **reads the full state, writes one key, returns the full state.** No
 
 ---
 
-## Tools (Day 2 principles — every tool passes all 5)
+## Tools (principles — every tool passes all 5)
 
 ### File & CLI tools
 
@@ -186,14 +186,14 @@ Every stage **reads the full state, writes one key, returns the full state.** No
 | `run_flutter_analyze` | `(project_dir: str) -> dict` | Runs `flutter analyze`, returns issues |
 | `run_flutter_test` | `(project_dir: str) -> dict` | Runs `flutter test`, parses pass/fail counts |
 
-### Knowledge tools (Day 4 RAG)
+### Knowledge tools (RAG)
 
 | Tool | Signature | Purpose |
 |---|---|---|
-| `retrieve_pattern` | `(query: str, top_k: int = 5) -> list[dict]` | Searches AppAspect patterns (auth, BLoC, charts, navigation) |
-| `retrieve_similar_app` | `(idea: str) -> dict` | Finds the closest past AppAspect project for reference |
+| `retrieve_pattern` | `(query: str, top_k: int = 5) -> list[dict]` | Searches patterns (auth, BLoC, charts, navigation) |
+| `retrieve_similar_app` | `(idea: str) -> dict` | Finds the closest past project for reference |
 
-### Market tools (Day 2 examples, reused)
+### Market tools (examples, reused)
 
 | Tool | Signature | Purpose |
 |---|---|---|
@@ -205,7 +205,7 @@ All tools return structured dicts with a `status` key — never raw strings, nev
 
 ## Stage-by-Stage Design
 
-### Stage 1 — Analysis (ReAct agent — Day 1 pattern)
+### Stage 1 — Analysis (ReAct agent — pattern)
 
 **Reads:** `idea`
 **Writes:** `analysis`
@@ -220,14 +220,14 @@ The agent has access to `get_play_store_reviews`, `retrieve_similar_app`, and `r
   "core_features": [...],        # MVP features
   "nice_to_have": [...],
   "competitor_insights": [...],  # from Play Store reviews
-  "similar_appaspect_projects": [...],
+  "similar_projects": [...],
   "tech_constraints": [...]      # Flutter version, null safety, BLoC
 }
 ```
 
 **Why ReAct here:** the agent doesn't know in advance how many competitors to look up or which patterns to retrieve. Multi-step tool use is required.
 
-### Stage 2 — Planning (Day 3 Planner pattern)
+### Stage 2 — Planning (Planner pattern)
 
 **Reads:** `idea`, `analysis`
 **Writes:** `plan`
@@ -248,7 +248,7 @@ Pure LLM call with a tight system prompt — **no tool access**. Output is a num
 ]
 ```
 
-### Stage 3 — Design (single LLM call — Day 5 spec stage)
+### Stage 3 — Design (single LLM call — spec stage)
 
 **Reads:** `analysis`, `plan`
 **Writes:** `design`
@@ -259,7 +259,7 @@ No tools. Structured output enforced by prompt.
 ```
 {
   "app_name": "...",
-  "package_name": "com.appaspect.<slug>",
+  "package_name": "com.example.<slug>",
   "screens": [
     {"name": "HomeScreen", "purpose": "...", "widgets": [...]}
   ],
@@ -357,11 +357,11 @@ print(f"[DONE] project at {state['project_dir']} — status: {state['status']}")
 
 ---
 
-## Knowledge Base (Day 4 seed content)
+## Knowledge Base (seed content)
 
-Before the agent runs, ingest these into ChromaDB `appaspect_patterns` collection:
+Before the agent runs, ingest these into ChromaDB `engineering_patterns` collection:
 
-- `patterns/bloc_pattern.md` — how AppAspect uses BLoC
+- `patterns/bloc_pattern.md` — how We use BLoC
 - `patterns/auth_jwt.md` — JWT + flutter_secure_storage pattern
 - `patterns/hive_persistence.md` — local DB with Hive
 - `patterns/go_router_nav.md` — navigation template

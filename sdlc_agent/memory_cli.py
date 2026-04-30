@@ -11,7 +11,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parent))
 
 from tools.memory import list_recent_runs, retrieve_past_run, clear_memory
-from vector_store import stats
+from tools.vector_store import stats
 
 
 def cmd_list():

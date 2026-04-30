@@ -1,11 +1,11 @@
-"""File operation tools. Day 2 principles: single purpose, typed, deterministic, observable, idempotent."""
+"""File operation tools. Principles: single purpose, typed, deterministic, observable, idempotent."""
 import os
 import subprocess
 from pathlib import Path
 
 
 _DEFAULT_WORKSPACE = Path.home() / 'Documents' / 'claude ai'
-_DEFAULT_ORG = 'com.appaspect'
+_DEFAULT_ORG = 'com.example'
 
 
 def workspace_root() -> Path:
@@ -48,7 +48,7 @@ def _resolve_safe(path: str) -> Path:
 
 def create_flutter_project(name: str, org: str = None) -> dict:
     """Run `flutter create` to scaffold a new project inside the workspace.
-    org defaults to FLUTTER_ORG env var or 'com.appaspect'."""
+    org defaults to FLUTTER_ORG env var or 'com.example'."""
     org = org or flutter_org()
     root = workspace_root()
     safe_name = ''.join(c if c.isalnum() or c == '_' else '_' for c in name).lower()
@@ -148,7 +148,7 @@ FILE_TOOL_SCHEMAS = [
                 'type': 'object',
                 'properties': {
                     'name': {'type': 'string', 'description': 'Project name (snake_case)'},
-                    'org': {'type': 'string', 'description': 'Organization, e.g. com.appaspect'},
+                    'org': {'type': 'string', 'description': 'Organization, e.g. com.example'},
                 },
                 'required': ['name'],
             },

@@ -1,6 +1,12 @@
-"""Sequential pipeline orchestrator — Day 5 pattern."""
-from state import initial_state
-from stages import analysis, planning, design, coding, testing
+"""Sequential pipeline orchestrator."""
+from core.state import initial_state
+from agents import (
+    deepika  as analysis,
+    aditi    as planning,
+    alia     as design,
+    priyanka as coding,
+    katrina  as testing,
+)
 from tools.memory import store_run
 
 

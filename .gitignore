@@ -29,11 +29,16 @@ htmlcov/
 .tox/
 
 # ---------- Vector DB / runtime data ----------
+# Old paths (kept for back-compat with main branch)
 sdlc_agent/chroma_db/
 sdlc_agent/checkpoints/
 sdlc_agent/sdlc_output/
 sdlc_agent/generated/
 sdlc_agent/logs/
+sdlc_agent/knowledge_base/
+# New paths after refactor
+runtime/
+data/chroma_db/
 *.sqlite3
 *.db
 

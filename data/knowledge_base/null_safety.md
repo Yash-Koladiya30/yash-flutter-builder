@@ -1,4 +1,4 @@
-# Null Safety Rules (AppAspect)
+# Null Safety Rules
 
 Lessons from the v2.1.3 `NullPointerException` in `UserProfileScreen`.
 

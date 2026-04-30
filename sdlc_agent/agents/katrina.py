@@ -3,8 +3,8 @@ import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-from llm import chat
-from state import validate_stage_input
+from core.llm import chat
+from core.state import validate_stage_input
 from tools.file_ops import write_dart_file
 from tools.flutter_cli import run_flutter_test, run_flutter_pub_get, run_flutter_build
 from tools.knowledge import retrieve_pattern

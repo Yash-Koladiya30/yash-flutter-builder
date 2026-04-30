@@ -14,7 +14,7 @@ CHROMA_PATH = str(Path(__file__).resolve().parent / 'chroma_db')
 
 # Two collections, one database.
 COLLECTIONS = {
-    'patterns': 'appaspect_patterns',  # static engineering knowledge (ingest_patterns.py)
+    'patterns': 'engineering_patterns',  # static engineering knowledge (ingest_patterns.py)
     'memory':   'agent_memory',        # dynamic run history (auto-written by pipeline)
 }
 

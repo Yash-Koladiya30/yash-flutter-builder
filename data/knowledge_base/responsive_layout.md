@@ -1,6 +1,6 @@
 # Responsive Layout
 
-AppAspect apps run on phones (primary), tablets, and occasionally foldables. Use breakpoints, not fixed widths.
+Apps run on phones (primary), tablets, and occasionally foldables. Use breakpoints, not fixed widths.
 
 ## Breakpoints
 

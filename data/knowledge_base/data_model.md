@@ -1,6 +1,6 @@
 # Data Model Convention
 
-Every AppAspect data model class follows this shape.
+Every data model class follows this shape.
 
 ## Template
 

@@ -1,12 +1,12 @@
-"""Stage 3 — Design. Produces structured JSON spec (Day 5 spec stage)."""
+"""Stage 3 — Design. Produces structured JSON spec."""
 import json
 import re
 import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-from llm import chat
-from state import validate_stage_input
+from core.llm import chat
+from core.state import validate_stage_input
 
 
 SYSTEM_PROMPT = '''You are a Flutter solution architect designing a Flutter mobile app.
@@ -14,7 +14,7 @@ Target stack: Flutter 3.x, Dart 3.x with null safety, Material 3, flutter_bloc, 
 
 Produce a complete Flutter app specification as a single JSON object with these keys:
   app_name (snake_case — becomes the flutter create project name),
-  package_name (e.g. "com.appaspect.receipt_tracker"),
+  package_name (e.g. "com.example.receipt_tracker"),
   screens (list of {name: ends with "Screen", purpose, widgets: [Flutter widget names]}),
   data_models (list of {name, fields:[{name, type}]}),
   blocs (list of {name: ends with "Bloc", events:[...], states:[...]}),

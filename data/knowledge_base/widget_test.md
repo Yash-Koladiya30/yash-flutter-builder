@@ -1,6 +1,6 @@
 # Widget Test Template
 
-Every screen in an AppAspect app has a matching widget test at `test/<screen>_test.dart`.
+Every screen in an app has a matching widget test at `test/<screen>_test.dart`.
 
 ## Template
 

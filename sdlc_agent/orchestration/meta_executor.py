@@ -1,12 +1,12 @@
 """Meta-executor: dispatches a single stage by name, with prereq validation and tracing.
 
-Day 3 executor pattern, lifted to the stage level. The planner tells it WHAT to run;
+Executor pattern, lifted to the stage level. The planner tells it WHAT to run;
 the executor handles HOW: check deps, invoke the stage module, capture timing and result.
 """
 import time
 import json
 
-from stage_registry import get_stage, check_prereqs
+from orchestration.registry import get_stage, check_prereqs
 from tools.jira import create_jira_issue, transition_to_status, jira_enabled
 
 

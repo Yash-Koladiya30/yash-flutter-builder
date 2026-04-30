@@ -359,14 +359,14 @@
 
   <!-- Pipeline -->
   <section class="panel">
-    <h2>SDLC Pipeline — Sequential Stages (Day 5 pattern)</h2>
+    <h2>SDLC Pipeline — Sequential Stages</h2>
     <div class="pipeline">
 
       <div class="stage s1">
         <div class="num">1</div>
         <h3>Analysis</h3>
         <div class="sub">Understand the problem</div>
-        <span class="pattern">Day 1 ReAct + Day 4 RAG</span>
+        <span class="pattern">ReAct + RAG</span>
         <ul>
           <li>Fetch competitor reviews</li>
           <li>Retrieve similar past projects</li>
@@ -383,7 +383,7 @@
         <div class="num">2</div>
         <h3>Planning</h3>
         <div class="sub">Task decomposition</div>
-        <span class="pattern">Day 3 Planner</span>
+        <span class="pattern">Planner</span>
         <ul>
           <li>No tools — pure LLM</li>
           <li>Numbered list output</li>
@@ -400,7 +400,7 @@
         <div class="num">3</div>
         <h3>Design</h3>
         <div class="sub">Structured spec</div>
-        <span class="pattern">Day 5 spec stage</span>
+        <span class="pattern">spec stage</span>
         <ul>
           <li>Screens + widgets</li>
           <li>Data models (typed)</li>
@@ -417,7 +417,7 @@
         <div class="num">4</div>
         <h3>Coding</h3>
         <div class="sub">Generate Flutter project</div>
-        <span class="pattern">Day 1 ReAct loop</span>
+        <span class="pattern">ReAct loop</span>
         <ul>
           <li>flutter create</li>
           <li>write_dart_file ×N</li>
@@ -434,7 +434,7 @@
         <div class="num">5</div>
         <h3>Testing</h3>
         <div class="sub">Widget + unit tests</div>
-        <span class="pattern">Day 5 stage + tool loop</span>
+        <span class="pattern">stage + tool loop</span>
         <ul>
           <li>Test file per BLoC/screen</li>
           <li>flutter test runner</li>
@@ -507,7 +507,7 @@ state = {<br>
 
   <!-- RAG diagram -->
   <section class="panel">
-    <h2>Knowledge Base — RAG over AppAspect Patterns (Day 4)</h2>
+    <h2>Knowledge Base — RAG over Patterns</h2>
     <div class="rag">
       <div class="rag-node">
         <div class="hd">knowledge_base/</div>
@@ -516,7 +516,7 @@ state = {<br>
       <div class="rag-arrow">→</div>
       <div class="rag-node" style="border-color: rgba(20,184,166,0.4);">
         <div class="hd">ChromaDB</div>
-        <div class="sm">collection: <code style="color:#a5b4fc;">appaspect_patterns</code><br>embedded via nomic-embed-text</div>
+        <div class="sm">collection: <code style="color:#a5b4fc;">engineering_patterns</code><br>embedded via nomic-embed-text</div>
       </div>
     </div>
     <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;">
@@ -539,7 +539,7 @@ state = {<br>
 
   <!-- Tools -->
   <section class="panel">
-    <h2>Tools — Day 2 Principles (single purpose · typed · deterministic · observable · idempotent)</h2>
+    <h2>Tools — Principles (single purpose · typed · deterministic · observable · idempotent)</h2>
     <div class="tools">
       <div class="tool">
         <span class="tool-cat cat-cli">CLI</span>
@@ -611,7 +611,7 @@ state = {<br>
 </div>
 
 <footer>
-  Flutter SDLC Agent · Local-first · Built on Day 1–5 patterns · No API keys required
+  Flutter SDLC Agent · Local-first · Built on patterns · No API keys required
 </footer>
 
 </body>

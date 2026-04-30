@@ -1,6 +1,6 @@
-# BLoC Pattern (AppAspect Convention)
+# BLoC Pattern
 
-AppAspect uses `flutter_bloc` for all non-trivial state management.
+We use `flutter_bloc` for all non-trivial state management.
 
 ## Structure
 

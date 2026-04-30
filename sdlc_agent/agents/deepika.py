@@ -3,8 +3,8 @@ import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-from agent import run_agent
-from llm import chat
+from core.agent import run_agent
+from core.llm import chat
 from tools.knowledge import KNOWLEDGE_TOOL_SCHEMAS, KNOWLEDGE_TOOL_MAP
 from tools.market_research import MARKET_TOOL_SCHEMAS, MARKET_TOOL_MAP
 from tools.memory import MEMORY_TOOL_SCHEMAS, MEMORY_TOOL_MAP
@@ -15,13 +15,13 @@ TOOLS = KNOWLEDGE_TOOL_SCHEMAS + MARKET_TOOL_SCHEMAS + MEMORY_TOOL_SCHEMAS + JIR
 TOOL_MAP = {**KNOWLEDGE_TOOL_MAP, **MARKET_TOOL_MAP, **MEMORY_TOOL_MAP, **JIRA_TOOL_MAP}
 
 
-SYSTEM_PROMPT = '''You are a Flutter mobile app analyst at AppAspect.
+SYSTEM_PROMPT = '''You are a Flutter mobile app analyst.
 The output of this pipeline is a cross-platform Flutter application (Dart, Material 3, BLoC pattern).
 Every analysis you produce should assume Flutter is the target stack.
 
 You have these tools:
 - retrieve_past_run(query): check if we've built something similar before. CALL THIS FIRST.
-- retrieve_pattern(query): search AppAspect Flutter engineering patterns.
+- retrieve_pattern(query): search Flutter engineering patterns.
 - retrieve_similar_app(idea): find the closest past Flutter project template.
 - get_play_store_reviews(app_id): see what users want/complain about.
 - search_jira_issues(jql): find requirements or user stories in Jira.

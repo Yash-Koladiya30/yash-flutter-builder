@@ -1,6 +1,6 @@
 # API Integration
 
-Use the `http` package for simple calls, `dio` when you need interceptors/cancellation. AppAspect default is `http`.
+Use the `http` package for simple calls, `dio` when you need interceptors/cancellation. Default is `http`.
 
 ## Repository pattern
 
