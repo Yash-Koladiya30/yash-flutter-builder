@@ -7,7 +7,7 @@ Built on the patterns from the Agentic AI training.
 
 ---
 
-## Pattern Mapping — Which Day Teaches What
+## Pattern Mapping — Which Pattern Powers Each Stage
 
 | SDLC Stage | Pattern Used | Why |
 |---|---|---|

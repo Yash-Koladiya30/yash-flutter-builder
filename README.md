@@ -115,8 +115,8 @@ git --version
 ### Step 1 — Clone the repo
 
 ```bash
-git clone https://github.com/<your-username>/yashs-agent.git
-cd yashs-agent
+git clone https://github.com/Yash-Koladiya30/yash-flutter-builder.git
+cd yash-flutter-builder
 ```
 
 ---
@@ -581,6 +581,6 @@ MIT — do whatever you want, attribution appreciated.
 
 <div align="center">
 
-Built with ❤️ by **Yash Koladiya** · [@yashkoladiya](https://github.com/yashkoladiya)
+Built with ❤️ by **Yash Koladiya** · [@Yash-Koladiya30](https://github.com/Yash-Koladiya30)
 
 </div>
