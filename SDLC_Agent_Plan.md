@@ -2,7 +2,7 @@
 
 An agentic system that takes a one-line app idea and produces a working Flutter project by walking through the five classical SDLC stages: **Analysis → Planning → Design → Coding → Testing**.
 
-Built on the patterns from the Agentic AI training.
+Built on agentic-AI patterns: ReAct loop, planner-executor, RAG, sequential pipeline.
 **Runs 100% locally via [Ollama](https://ollama.com) — no API keys, no cloud calls.**
 
 ---

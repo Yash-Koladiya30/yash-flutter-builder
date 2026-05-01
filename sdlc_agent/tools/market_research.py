@@ -1,4 +1,4 @@
-"""Market research tools. Mock data for training — swap for google-play-scraper in production."""
+"""Market research tools. Mock data for demo — swap for google-play-scraper in production."""
 
 
 _MOCK_REVIEWS_BY_CATEGORY = {
